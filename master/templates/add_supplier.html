@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Supplier</title>
+</head>
+<body>
+    <h1>Add Supplier</h1>
+    
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Add Supplier</button>
+    </form>
+
+    <a href="{% url 'supplier_page' %}">Back to Suppliers</a>
+    <br>
+    <a href="{% url 'homepage' %}">Go to Homepage</a>
+</body>
+</html>

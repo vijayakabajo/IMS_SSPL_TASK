@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Supplier List</title>
+</head>
+<body>
+    <h1>Supplier List</h1>
+    
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Contact Number</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supplier in suppliers %}
+                {% if supplier.status %}
+                <tr>
+                    <td>{{ supplier.name }}</td>
+                    <td>{{ supplier.contact_number }}</td>
+                    <td><a href="{% url 'edit_supplier' supplier.id %}">Edit</a></td>
+                    <td>
+                        <form action="{% url 'delete_supplier' supplier.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'add_supplier' %}">Add New Supplier</a>
+    <br>
+    <a href="{% url 'homepage' %}">Go to Homepage</a>
+</body>
+</html>

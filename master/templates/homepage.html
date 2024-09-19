@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management System</title>
+</head>
+<body>
+    <header>
+        <h1>Inventory Management System</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="{% url 'supplier_page' %}">Supplier</a></li>
+            <li><a href="{% url 'items_page' %}">Items</a></li>
+            {% comment %} <li><a href="{% url 'sales_page' %}">Sales</a></li>
+            <li><a href="{% url 'stocks_page' %}">Report</a></li> {% endcomment %}
+        </ul> 
+    </nav>
+
+    <footer>
+        <p>&copy; 2024 Inventory Management System (SSPL)</p>
+    </footer>
+</body>
+</html>
+
+
