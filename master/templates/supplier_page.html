@@ -6,7 +6,7 @@
 </head>
 <body>
     <h1>Supplier List</h1>
-    
+
     <table border="1">
         <thead>
             <tr>
@@ -22,9 +22,9 @@
                 <tr>
                     <td>{{ supplier.name }}</td>
                     <td>{{ supplier.contact_number }}</td>
-                    <td><a href="{% url 'edit_supplier' supplier.id %}">Edit</a></td>
+                    <td><a href="{% url 'handle_supplier' 'edit' supplier.id %}">Edit</a></td>
                     <td>
-                        <form action="{% url 'delete_supplier' supplier.id %}" method="post">
+                        <form action="{% url 'handle_supplier' 'delete' supplier.id %}" method="post">
                             {% csrf_token %}
                             <button type="submit">Delete</button>
                         </form>
@@ -35,7 +35,7 @@
         </tbody>
     </table>
 
-    <a href="{% url 'add_supplier' %}">Add New Supplier</a>
+    <a href="{% url 'handle_supplier' 'add' 0 %}">Add New Supplier</a> <!-- 'add' action with id as 0 for new -->
     <br>
     <a href="{% url 'homepage' %}">Go to Homepage</a>
 </body>

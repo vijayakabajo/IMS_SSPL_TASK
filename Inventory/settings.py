@@ -55,7 +55,7 @@ ROOT_URLCONF = 'Inventory.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'my_project' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

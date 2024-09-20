@@ -22,9 +22,9 @@
                 <tr>
                     <td>{{ item.name }}</td>
                     <td>₹{{ item.price }}</td>
-                    <td><a href="{% url 'edit_item' item.id %}">Edit</a></td>
+                    <td><a href="{% url 'handle_items' 'edit' item.id %}">Edit</a></td>
                     <td>
-                        <form action="{% url 'delete_item' item.id %}" method="post">
+                        <form action="{% url 'handle_items' 'delete' item.id %}" method="post">
                             {% csrf_token %}
                             <button type="submit">Delete</button>
                         </form>
@@ -35,7 +35,7 @@
         </tbody>
     </table>
 
-    <a href="{% url 'add_item' %}">Add New Item</a>
+    <a href="{% url 'handle_items' 'add' 0 %}">Add New Item</a>
     <br>
     <a href="{% url 'homepage' %}">Go to Homepage</a>
 </body>
