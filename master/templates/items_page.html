@@ -11,9 +11,7 @@
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Quantity</th>
                 <th>Price</th>
-                <th>Supplier</th>
                 <th>Edit</th>
                 <th>Delete</th>
             </tr>
@@ -23,9 +21,7 @@
                 {% if item.status %}
                 <tr>
                     <td>{{ item.name }}</td>
-                    <td>{{ item.quantity }}</td>
                     <td>₹{{ item.price }}</td>
-                    <td>{{ item.supplier.name }}</td>
                     <td><a href="{% url 'edit_item' item.id %}">Edit</a></td>
                     <td>
                         <form action="{% url 'delete_item' item.id %}" method="post">

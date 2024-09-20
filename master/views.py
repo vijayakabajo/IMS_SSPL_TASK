@@ -23,7 +23,7 @@ def add_supplier(request):
         form = SupplierForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('supplier_page')
+            return redirect('supplier_page')   #redirecting after adding supplier
     else:
         form = SupplierForm()
     return render(request, 'add_supplier.html', {'form': form})
