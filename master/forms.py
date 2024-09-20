@@ -11,6 +11,8 @@ class ItemForm(forms.ModelForm):
         model = Item
         fields = ['name', 'quantity', 'price', 'supplier']
 
+
+        #validatin
     def clean_quantity(self):
         quantity = self.cleaned_data.get('quantity')
         if quantity < 0:

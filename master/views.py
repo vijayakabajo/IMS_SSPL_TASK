@@ -40,10 +40,10 @@ def edit_supplier(request, supplier_id):
         form = SupplierForm(instance=supplier)
     return render(request, 'edit_supplier.html', {'form': form})
 
-# Delete supplier (soft delete)
+# Delete supplier
 def delete_supplier(request, supplier_id):
     supplier = Supplier.objects.get(id=supplier_id)
-    supplier.status = False
+    supplier.status = False      #softdlt
     supplier.save()
     return redirect('supplier_page')
 
@@ -74,7 +74,7 @@ def edit_item(request, item_id):
 # Delete item (soft delete)
 def delete_item(request, item_id):
     item = Item.objects.get(id=item_id)
-    item.status = False
+    item.status = False #softdel
     item.save()
     return redirect('items_page')
 

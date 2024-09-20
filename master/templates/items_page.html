@@ -24,7 +24,7 @@
                 <tr>
                     <td>{{ item.name }}</td>
                     <td>{{ item.quantity }}</td>
-                    <td>{{ item.price }}</td>
+                    <td>₹{{ item.price }}</td>
                     <td>{{ item.supplier.name }}</td>
                     <td><a href="{% url 'edit_item' item.id %}">Edit</a></td>
                     <td>
