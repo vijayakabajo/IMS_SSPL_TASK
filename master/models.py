@@ -16,3 +16,14 @@ class Item(models.Model):
     name = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2)    #100.00
     status = models.SmallIntegerField(default=1)   #pseudo delete
+
+
+
+
+
+
+
+
+
+    # null=false can't be null for db
+    # blank=false can't be null for forms
