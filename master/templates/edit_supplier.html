@@ -1,20 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Edit Supplier</title>
-</head>
-<body>
-    <h1>Edit Supplier</h1>
+{% extends "layout.html" %}
+{% block content %}
+    <h1 class='text-3xl'>Edit Supplier</h1>
     
     <form method="POST">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Update Supplier</button>
+        <button class='btn btn-primary' type="submit">Update Supplier</button>
     </form>
-
-    <a href="{% url 'supplier_page' %}">Back to Suppliers</a>
-    <br>
-    <a href="{% url 'homepage' %}">Go to Homepage</a>
-</body>
-</html>
+{%endblock%}

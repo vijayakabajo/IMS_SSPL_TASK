@@ -1,20 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Edit Item</title>
-</head>
-<body>
-    <h1>Edit Item</h1>
-    
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Update Item</button>
-    </form>
+{% extends "layout.html" %}
+{% block content %}
+    <h1 class='text-3xl'>Edit Item</h1>
 
-    <a href="{% url 'items_page' %}">Back to Items</a>
-    <br>
-    <a href="{% url 'homepage' %}">Go to Homepage</a>
-</body>
-</html>
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.as_p }} 
+      {% if item and item.image %}
+      <img
+        src="{{ item.image.url }}"
+        alt="Item Image"
+        style="max-width: 200px"
+      />
+      {% endif %}
+      <button class="btn btn-primary" type="submit">Update Item</button>
+    </form>
+  {%endblock%}

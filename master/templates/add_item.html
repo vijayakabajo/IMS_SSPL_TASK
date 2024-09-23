@@ -1,20 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Add Item</title>
-</head>
-<body>
-    <h1>Add Item</h1>
+{% extends "layout.html" %}
+{% block content %}
+    <h1 class='text-3xl'>Add Item</h1>
     
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data" class='p-4'>
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Add Item</button>
+        <button class='btn btn-primary' type="submit">Add Item</button>
     </form>
-
-    <a href="{% url 'items_page' %}">Back to Items</a>
-    <br>
-    <a href="{% url 'homepage' %}">Go to Homepage</a>
-</body>
-</html>
+{% endblock %}

@@ -1,3 +1,4 @@
+from datetime import timezone
 from django.db import models
 from django.core.validators import RegexValidator
 
@@ -17,6 +18,12 @@ class Item(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False, unique=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False)    #100.00
     status = models.SmallIntegerField(default=1, null=False)   #pseudo delete
+    image= models.ImageField(upload_to='item_images', blank=True, null=True )
+    created_At = models.DateTimeField(auto_now_add=True)
+    updated_At = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
 
 
 

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Purchase
+from .models import PurchaseMaster
 
 # Create your views here.
 # purchase_page 

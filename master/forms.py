@@ -9,7 +9,7 @@ class SupplierForm(forms.ModelForm):
 class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
-        fields = ['name', 'price']
+        fields = ['name', 'price', 'image']
 
 
         #validatin
@@ -18,4 +18,5 @@ class ItemForm(forms.ModelForm):
         if price < 0:
             raise forms.ValidationError("Price cannot be negative.")
         return price
+    
 

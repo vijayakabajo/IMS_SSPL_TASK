@@ -49,7 +49,7 @@ def handle_supplier(request, action, supplier_id=None):
 def handle_items(request, action, item_id=None):
     if action == 'add':
         if request.method == 'POST':
-            form = ItemForm(request.POST)
+            form = ItemForm(request.POST, request.FILES)
             if form.is_valid():
                 form.save()
                 return redirect('items_page')
@@ -60,13 +60,13 @@ def handle_items(request, action, item_id=None):
     elif action == 'edit':
         item = get_object_or_404(Item, id=item_id)
         if request.method == 'POST':
-            form = ItemForm(request.POST, instance=item)
+            form = ItemForm(request.POST,  request.FILES, instance=item)
             if form.is_valid():
                 form.save()
                 return redirect('items_page')
         else:
             form = ItemForm(instance=item)
-        return render(request, 'edit_item.html', {'form': form, 'action': action})
+        return render(request, 'edit_item.html', {'form': form, 'action': action, 'item': item })
 
     elif action == 'delete':
         item = get_object_or_404(Item, id=item_id)
