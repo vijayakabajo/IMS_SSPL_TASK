@@ -1,4 +1,3 @@
-# views.py
 from django.shortcuts import render, redirect
 from django.db import transaction
 from .models import PurchaseMaster, PurchaseDetail, TempTable
@@ -10,7 +9,7 @@ def purchase_page(request):
     purchase_form = PurchaseMasterForm()
     temp_form = TempTableForm()
 
-    if request.method == 'POST':             # Adding items to the temp table
+    if request.method == 'POST':             
         if 'add_item' in request.POST:
             temp_form = TempTableForm(request.POST)
             if temp_form.is_valid():
@@ -22,12 +21,12 @@ def purchase_page(request):
         if 'finalize_purchase' in request.POST:                     
             purchase_form = PurchaseMasterForm(request.POST)         # Finalizing the purchase
             if purchase_form.is_valid():
-                with transaction.atomic():                                       # transaction.atomic()*
-                    purchase_master = purchase_form.save(commit=False)          #only validates, it won't commit changes
-                    purchase_master.sub_total = sum(item.items_total for item in temp_items)
+                with transaction.atomic():           #transaction.atomic()*                                    
+                    purchase_master = purchase_form.save(commit=False)     #commit_false only validates
+                    purchase_master.sub_total = sum(item.items_total for item in temp_items)   #sub_total
                     purchase_master.save()
 
-                    # Save PurchaseDetails
+                    # Savepurchasedetails after saving the purchasemaster
                     for temp_item in temp_items:
                         PurchaseDetail.objects.create(
                             purchase_master=purchase_master,
@@ -36,10 +35,12 @@ def purchase_page(request):
                             items_total=temp_item.items_total
                         )
 
-                    # Clear TempTable after finalizing the purchase
+                    #clearing TempTable after final purchase
                     TempTable.objects.all().delete()
 
                 return redirect('purchase-page')
+            else:
+                print(purchase_form.errors)
 
     context = {
         'purchase_form': purchase_form,

@@ -20,19 +20,19 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                   <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                      <a class="nav-link" href="{% url 'supplier_page' %}">Suppliers</a>
+                      <a class="nav-link text-light" href="{% url 'supplier_page' %}">Suppliers</a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link" href="{% url 'items_page' %}">Items</a>
+                      <a class="nav-link text-light" href="{% url 'items_page' %}">Items</a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link" href="{% url 'purchase-page' %}">Purchase</a>
+                      <a class="nav-link text-light" href="{% url 'purchase-page' %}">Purchase</a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link" href="#">Sales</a>
+                      <a class="nav-link text-light" href="#">Sales</a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link" href="#">Report</a>
+                      <a class="nav-link text-light" href="#">Report</a>
                     </li>
                   </ul>
                 </div>
@@ -40,13 +40,12 @@
         </div>
       </nav>
 
-    <!-- Main Content Area (Tailwind with Bootstrap utility) -->
-    <div class="container-fluid mt-4" style="min-height: 100vh;">
+
+    <div class="container-fluid bg-warning p-10" style="min-height: 100vh;">
         {% block content %}
         <!-- The main page content will go here -->
         {% endblock %}
     </div>
-    <!-- Bootstrap JS should be loaded after content -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
