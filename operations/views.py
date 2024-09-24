@@ -10,7 +10,7 @@ def purchase_page(request):
     purchase_form = PurchaseMasterForm()
     temp_form = TempTableForm()
 
-    if request.method == 'POST':             # Adding items to the temporary table
+    if request.method == 'POST':             # Adding items to the temp table
         if 'add_item' in request.POST:
             temp_form = TempTableForm(request.POST)
             if temp_form.is_valid():
@@ -22,9 +22,8 @@ def purchase_page(request):
         if 'finalize_purchase' in request.POST:                     
             purchase_form = PurchaseMasterForm(request.POST)         # Finalizing the purchase
             if purchase_form.is_valid():
-                with transaction.atomic():
-                    # Save PurchaseMaster
-                    purchase_master = purchase_form.save(commit=False)
+                with transaction.atomic():                                       # transaction.atomic()*
+                    purchase_master = purchase_form.save(commit=False)          #only validates, it won't commit changes
                     purchase_master.sub_total = sum(item.items_total for item in temp_items)
                     purchase_master.save()
 
