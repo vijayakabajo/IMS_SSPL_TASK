@@ -1,6 +1,39 @@
 {% extends "layout.html" %}
-{% block content %}
+{%block content%}
+    <h1 class="text-3xl">Purchase Page</h1>
+    
+    <h2 class="text-2xl mt-4">Select Supplier and Items</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ purchase_form.as_p }}
+        <h3 class='text-xl mt-3'>Add Items</h3>
+        {{ temp_form.as_p }}
+        <button class="btn btn-primary" type="submit" name="add_item">Add Item</button>
+    </form>
 
-<h1>Purchase Page</h1>
+    <h3 class="text-2xl mt-4">Items Added to Purchase</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in temp_items %}
+            <tr>
+                <td>{{ item.item_id.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.items_total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-{% endblock%}
+    <form method="post">
+        {% csrf_token %}
+        <button class="btn btn-primary" type="submit" name="finalize_purchase">Finalize Purchase</button>
+    </form>
+    {%endblock%}
+

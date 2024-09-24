@@ -1,18 +1,46 @@
 from django.db import models
+from master.models import Supplier, Item
 
-# Create your models here.
 class PurchaseMaster(models.Model):
-    invoice_number = models.IntegerField(blank=False, null=False, unique=True)
-    supplier_id = models.CharField(max_length=100, null=False, blank=False)
+    invoice_number = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    supplier_id = models.ForeignKey(Supplier, on_delete=models.CASCADE)  
+    sub_total = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True) 
     status = models.SmallIntegerField(default=1, null=False)
-    total = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def save(self, *args, **kwargs):
+        if not self.invoice_number:
+            last_invoice = PurchaseMaster.objects.order_by('invoice_number').last()
+            if last_invoice and last_invoice.invoice_number.startswith('INV-'):
+                last_invoice_num = int(last_invoice.invoice_number.split('-')[1])
+                new_invoice_num = last_invoice_num + 1
+            else:
+                new_invoice_num = 1000
+            self.invoice_number = f"INV-{new_invoice_num}"
+        super(PurchaseMaster, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.invoice_number
+
 
 class PurchaseDetail(models.Model):
-    item_name = models.CharField(max_length=100, null=False, blank=False)
-    price = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False )
+    purchase_master = models.ForeignKey(PurchaseMaster, on_delete=models.CASCADE, related_name='purchase_details')
+    item_id = models.ForeignKey(Item, on_delete=models.CASCADE) 
     quantity = models.IntegerField(null=False, blank=False)
+    items_total = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True) 
     status = models.SmallIntegerField(default=1, null=False)
-    status = models.SmallIntegerField(default=1, null=False)
-    total = models.DecimalField(max_digits=10, decimal_places=2)
 
-    
+    def __str__(self):
+        return f"{self.item_id.name} - {self.purchase_master.invoice_number}"
+
+
+class TempTable(models.Model):
+    item_id = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity = models.IntegerField(null=False, blank=False)
+    items_total = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True) 
+    status = models.SmallIntegerField(default=1, null=False)
+
+    def __str__(self):
+        return f"{self.item_id.name} - {self.quantity}"
