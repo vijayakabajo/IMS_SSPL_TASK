@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {%block content%}
-
+<h1 class='text-3xl mb-4'>Purchase New Items</h1>
 <div class='container'>
 <form method="post" class='space-x-4'>
     {% csrf_token %}
@@ -19,7 +19,7 @@
     <table class="table mt-4">
         <thead>
           <tr>
-            <th scope="col">#</th>
+            <th scope="col">Sl. No.</th>
             <th scope="col">Item</th>
             <th scope="col">Quantity</th>
             <th scope="col">Total</th>
@@ -28,7 +28,7 @@
         <tbody>
             {% for item in temp_items %}
           <tr>
-            <th scope="row">1</th>
+            <th scope="row">{{ forloop.counter }}</th>
             <td>{{ item.item_id.name }}</td>
             <td>{{ item.quantity }}</td>
             <td>{{ item.items_total }}</td>

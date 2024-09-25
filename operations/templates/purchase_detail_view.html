@@ -1,19 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purchase Details - {{ purchase_master.invoice_number }}</title>
-</head>
-<body>
-    <h1>Purchase Details - {{ purchase_master.invoice_number }}</h1>
-    <p>Supplier: {{ purchase_master.supplier_id.name }}</p>
-    <p>Sub Total: {{ purchase_master.sub_total }}</p>
-    <p>Created At: {{ purchase_master.created_at }}</p>
-    <p>Status: {{ purchase_master.status }}</p>
+{%extends 'layout.html'%}
+{%block content%}
 
-    <h2>Items</h2>
-    <table>
+    <h1 class='text-3xl'>Purchase Details</h1>
+    <p>Invoice Number:  {{ purchase_master.invoice_number }}</p>
+    <p>Supplier: {{ purchase_master.supplier_id.name }}</p>
+    <p>Sub Total: ₹{{ purchase_master.sub_total }}/-</p>
+    <p>Date & Time: {{ purchase_master.created_at }}</p>
+
+    <h2 class='text-2xl mt-4'>Items</h2>
+    <table class='table mt-1'>
         <thead>
             <tr>
                 <th>Item Name</th>
@@ -26,12 +21,13 @@
             <tr>
                 <td>{{ detail.item_id.name }}</td>
                 <td>{{ detail.quantity }}</td>
-                <td>{{ detail.items_total }}</td>
+                <td>₹{{ detail.items_total }}/-</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <a href="{% url 'purchase_master_list' %}">Back to Purchase List</a>
-</body>
-</html>
+    <a href="{% url 'purchase_master_list' %}" class='btn btn-primary'><< Purchase List</a>
+
+
+    {% endblock %}

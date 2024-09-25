@@ -1,20 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purchase Master List</title>
-</head>
-<body>
-    <h1>Purchase Master List</h1>
-    <table>
+{%extends 'layout.html'%}
+{%block content%}
+
+    <div class='flex justify-between mx-2'>
+        <h1 class='text-3xl'>Purchase List</h1>
+        <a href="{% url 'purchase-page' %}" class='text-bold btn btn-primary mb-2'>New Purchase</a>
+    </div>
+
+    <table class='table mt-4'>
         <thead>
             <tr>
                 <th>Invoice Number</th>
                 <th>Supplier</th>
                 <th>Sub Total</th>
-                <th>Created At</th>
-                <th>Status</th>
+                <th>Date</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -23,15 +21,14 @@
             <tr>
                 <td>{{ purchase.invoice_number }}</td>
                 <td>{{ purchase.supplier_id.name }}</td>
-                <td>{{ purchase.sub_total }}</td>
+                <td>₹{{ purchase.sub_total }}/-</td>
                 <td>{{ purchase.created_at }}</td>
-                <td>{{ purchase.status }}</td>
                 <td>
-                    <a href="{% url 'purchase_detail_view' purchase.id %}">View</a>
+                    <a href="{% url 'purchase_detail_view' purchase.id %}" class='btn btn-primary'>View</a>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</body>
-</html>
+
+    {% endblock %}
