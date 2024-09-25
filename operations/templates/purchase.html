@@ -1,24 +1,54 @@
 {% extends "layout.html" %}
 {%block content%}
-<form method="post">
+
+<div class='container'>
+<form method="post" class='space-x-4'>
     {% csrf_token %}
-    {{ purchase_form.supplier_id }} 
-    {{ purchase_form.sub_total }} 
+    <label>Supplier:</label>
+    {{ purchase_form.supplier_id }}
     
- 
-    {{ temp_form.item_id }} 
+    <label>Item:</label>
+    {{ temp_form.item_id }}
+
+    <label>Quantity:</label>
     {{ temp_form.quantity }}
 
-    <button type="submit" name="add_item">Add Item</button>
+    <button class='btn btn-primary' type="submit" name="add_item">Add Item</button>
 
-    <ul>
-        {% for item in temp_items %}
-        <li>{{ item.item_id.name }} - {{ item.quantity }} - {{ item.items_total }}</li>
-        {% endfor %}
-    </ul>
+    {% if temp_items.exists %}
+    <table class="table mt-4">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Item</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for item in temp_items %}
+          <tr>
+            <th scope="row">1</th>
+            <td>{{ item.item_id.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.items_total }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
 
-    <button type="submit" name="finalize_purchase">Finalize Purchase</button>
+      {% endif %}
+
+    <div>
+        <strong>Subtotal: </strong> {{ sub_total }}
+    </div>
+
+  
+    {% if temp_items.exists %}
+        <button class='btn btn-primary mt-2' type="submit" name="finalize_purchase">Purchase</button>
+    {% endif %}
 </form>
+</div>
 
     {%endblock%}
 

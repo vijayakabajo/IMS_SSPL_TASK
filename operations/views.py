@@ -1,32 +1,51 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
 from .models import PurchaseMaster, PurchaseDetail, TempTable
 from master.models import Supplier, Item
 from .forms import TempTableForm, PurchaseMasterForm
 
+
+
+#------------------------------------------purchase page--------------------------------------------------------
+
 def purchase_page(request):
-    temp_items = TempTable.objects.all()   #getting temp tables details
-    purchase_form = PurchaseMasterForm()
+    supplier_id = request.session.get('supplier_id', None)   
+    if supplier_id:
+        initial_data = {'supplier_id': supplier_id}
+    else:
+        initial_data = {}
+
+    temp_items = TempTable.objects.all()  #temptable data
+
+
+    purchase_form = PurchaseMasterForm(initial=initial_data) 
     temp_form = TempTableForm()
 
-    if request.method == 'POST':             
+    if request.method == 'POST':
+        # Adding items to temptable
         if 'add_item' in request.POST:
             temp_form = TempTableForm(request.POST)
             if temp_form.is_valid():
                 temp_item = temp_form.save(commit=False)
                 temp_item.items_total = temp_item.item_id.price * temp_item.quantity
                 temp_item.save()
+                
+                supplier_id = request.POST.get('supplier_id')
+                request.session['supplier_id'] = supplier_id
+                
                 return redirect('purchase-page')
 
-        if 'finalize_purchase' in request.POST:                     
-            purchase_form = PurchaseMasterForm(request.POST)         # Finalizing the purchase
-            if purchase_form.is_valid():
-                with transaction.atomic():           #transaction.atomic()*                                    
-                    purchase_master = purchase_form.save(commit=False)     #commit_false only validates
-                    purchase_master.sub_total = sum(item.items_total for item in temp_items)   #sub_total
+        # Finalize
+        if 'finalize_purchase' in request.POST:
+            purchase_form = PurchaseMasterForm(request.POST)
+            if purchase_form.is_valid():  # Validate only PurchaseMasterForm
+                with transaction.atomic():
+                    purchase_master = purchase_form.save(commit=False)
+                    
+                    #sub_total
+                    purchase_master.sub_total = sum(item.items_total for item in temp_items)
                     purchase_master.save()
 
-                    # Savepurchasedetails after saving the purchasemaster
                     for temp_item in temp_items:
                         PurchaseDetail.objects.create(
                             purchase_master=purchase_master,
@@ -35,16 +54,52 @@ def purchase_page(request):
                             items_total=temp_item.items_total
                         )
 
-                    #clearing TempTable after final purchase
                     TempTable.objects.all().delete()
+                    
+                    if 'supplier_id' in request.session:
+                        del request.session['supplier_id']
 
                 return redirect('purchase-page')
-            else:
-                print(purchase_form.errors)
+
+    sub_total = sum(item.items_total for item in temp_items)
 
     context = {
         'purchase_form': purchase_form,
         'temp_form': temp_form,
         'temp_items': temp_items,
-    }
+        'sub_total': sub_total,
+    }    #to pass it to the template
     return render(request, 'purchase.html', context)
+
+
+
+def purchase_master_list(request):
+    # Fetch all PurchaseMaster records
+    purchases = PurchaseMaster.objects.all()
+    return render(request, 'purchase_master_list.html', {'purchases': purchases})
+
+def purchase_detail_view(request, pk):
+    # Fetch the specific PurchaseMaster by its primary key
+    purchase_master = get_object_or_404(PurchaseMaster, pk=pk)
+    # Fetch all PurchaseDetails associated with the PurchaseMaster
+    purchase_details = PurchaseDetail.objects.filter(purchase_master=purchase_master)
+    return render(request, 'purchase_detail_view.html', {'purchase_master': purchase_master, 'purchase_details': purchase_details})
+
+
+
+
+
+
+
+
+    #-----------------------------------------------------sales page-------------------------------------------------
+
+def sales_page(request):
+
+
+
+
+    context = {
+
+    }    
+    return render(request, 'sales.html', context)

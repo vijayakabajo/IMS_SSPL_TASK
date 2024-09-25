@@ -2,9 +2,12 @@
 {% block content %}
     <h1 class='text-3xl'>Edit Item</h1>
 
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data" class='space-y-4'>
       {% csrf_token %}
-      {{ form.as_p }} 
+      {% comment %} {{ form.as_p }}  {% endcomment %}
+      {{ form.name }} <br>
+      {{ form.price }} <br>
+      {{ form.image }}
       {% if item and item.image %}
       <img
         src="{{ item.image.url }}"

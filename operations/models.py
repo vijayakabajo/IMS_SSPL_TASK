@@ -44,3 +44,9 @@ class TempTable(models.Model):
 
     def __str__(self):
         return f"{self.item_id.name} - {self.quantity}"
+    
+
+class SalesMaster(models.Model):
+    purchase_number = models.IntegerField(null=False, blank=False)
+    item_id = models.CharField(max_length=100, null=False, blank=False)
+    quantity = models.IntegerField(null=False, blank= False)

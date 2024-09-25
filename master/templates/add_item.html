@@ -2,7 +2,7 @@
 {% block content %}
     <h1 class='text-3xl'>Add Item</h1>
     
-    <form method="POST" enctype="multipart/form-data" class='p-4'>
+    <form method="POST" enctype="multipart/form-data" class='space-y-4'>
         {% csrf_token %}
         {{ form.as_p }}
         <button class='btn btn-primary' type="submit">Add Item</button>

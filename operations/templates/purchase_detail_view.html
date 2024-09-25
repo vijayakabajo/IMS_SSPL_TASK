@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Details - {{ purchase_master.invoice_number }}</title>
+</head>
+<body>
+    <h1>Purchase Details - {{ purchase_master.invoice_number }}</h1>
+    <p>Supplier: {{ purchase_master.supplier_id.name }}</p>
+    <p>Sub Total: {{ purchase_master.sub_total }}</p>
+    <p>Created At: {{ purchase_master.created_at }}</p>
+    <p>Status: {{ purchase_master.status }}</p>
+
+    <h2>Items</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Quantity</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detail in purchase_details %}
+            <tr>
+                <td>{{ detail.item_id.name }}</td>
+                <td>{{ detail.quantity }}</td>
+                <td>{{ detail.items_total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'purchase_master_list' %}">Back to Purchase List</a>
+</body>
+</html>

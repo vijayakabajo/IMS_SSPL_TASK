@@ -2,7 +2,7 @@
 {% block content %}
     <h1 class='text-3xl'>Edit Supplier</h1>
     
-    <form method="POST">
+    <form method="POST" class='space-y-4'>
         {% csrf_token %}
         {{ form.as_p }}
         <button class='btn btn-primary' type="submit">Update Supplier</button>
