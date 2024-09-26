@@ -1,5 +1,9 @@
 from django.db import models
 from master.models import Supplier, Item
+from django.core.validators import RegexValidator
+
+
+#-------------------------------------Purchase Models----------------------------------------------------------
 
 class PurchaseMaster(models.Model):
     invoice_number = models.CharField(max_length=20, unique=True, blank=True, null=True)
@@ -46,11 +50,30 @@ class TempTable(models.Model):
         return f"{self.item_id.name} - {self.quantity}"
     
 
+#-------------------------------------------Sales Models-------------------------------------------------
+    
+
 class SalesMaster(models.Model):
     customer_name= models,models.CharField(max_length=50,blank=False, null=False)
+    contact_number = models.CharField(
+        max_length=10,
+        blank=False, null=False, unique=True,
+        validators=[RegexValidator(r'^\d{10}$', 'Enter a 10-digit mobile number')]#Note:Unique: True (will add later)
+    )
     bill_number = models.IntegerField(null=False, blank=False)
+    bill_date = models.DateField( blank=False, null=False)
     item_id = models.CharField(max_length=100, null=False, blank=False)
     quantity = models.IntegerField(null=False, blank= False)
-    total = models.DecimalField(max_digits=10, decimal_places=2)
+    sub_total = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateField(auto_now_add=True)
     status = models.SmallIntegerField(default=1, null= False)
+
+class SalesDetail(models.Model):
+    item_id = models.ForeignKey(Item, on_delete=models.CASCADE) 
+    item_price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.IntegerField(null=False, blank=False)
+    items_total = models.DecimalField(max_digits=10, decimal_places=2)
+    sales_master = models.ForeignKey(SalesMaster, on_delete=models.CASCADE, related_name='sales_details')
+    created_at = models.DateTimeField(auto_now_add=True) 
+    status = models.SmallIntegerField(default=1, null=False)
+
