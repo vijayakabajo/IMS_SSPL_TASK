@@ -1,54 +1,58 @@
 {% extends "layout.html" %}
-{%block content%}
+{% block content %}
 <h1 class='text-3xl mb-4'>Purchase New Items</h1>
 <div class='container'>
-<form method="post" class='space-x-4'>
-    {% csrf_token %}
-    <label>Supplier:</label>
-    {{ purchase_form.supplier_id }}
-    
-    <label>Item:</label>
-    {{ temp_form.item_id }}
 
-    <label>Quantity:</label>
-    {{ temp_form.quantity }}
+    <!-- First form to add items -->
+    <form method="post" class='space-x-4'>
+        {% csrf_token %}
+        <label>Item:</label>
+        {{ temp_form.item_id }}
+        <label>Quantity:</label>
+        {{ temp_form.quantity }}
 
-    <button class='btn btn-primary' type="submit" name="add_item">Add Item</button>
+        <button class='btn btn-primary' type="submit" name="add_item">Add Item</button>
+        {{ temp_form.item_id.errors }}
+    </form>
 
+    <!-- Display added items -->
     {% if temp_items.exists %}
     <table class="table mt-4">
         <thead>
-          <tr>
-            <th scope="col">Sl. No.</th>
-            <th scope="col">Item</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Total</th>
-          </tr>
+            <tr>
+                <th scope="col">Sl. No.</th>
+                <th scope="col">Item</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Total</th>
+            </tr>
         </thead>
         <tbody>
             {% for item in temp_items %}
-          <tr>
-            <th scope="row">{{ forloop.counter }}</th>
-            <td>{{ item.item_id.name }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.items_total }}</td>
-          </tr>
-          {% endfor %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ item.item_id.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.items_total }}</td>
+            </tr>
+            {% endfor %}
         </tbody>
-      </table>
+    </table>
+    {% endif %}
 
-      {% endif %}
-
+    <!-- Subtotal display -->
     <div>
         <strong>Subtotal: </strong> {{ sub_total }}
     </div>
 
-  
+    <!-- Second form to finalize purchase -->
     {% if temp_items.exists %}
-        <button class='btn btn-primary mt-2' type="submit" name="finalize_purchase">Purchase</button>
+    <form method="post" class='space-x-4 mt-4'>
+        {% csrf_token %}
+        <label>Supplier:</label>
+        {{ purchase_form.supplier_id }}
+        <button class='btn btn-primary mt-2' type="submit" name="finalize_purchase">Finalize Purchase</button>
+    </form>
     {% endif %}
-</form>
+
 </div>
-
-    {%endblock%}
-
+{% endblock %}
