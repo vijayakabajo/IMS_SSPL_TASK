@@ -4,10 +4,10 @@
     <h1 class='text-3xl'>Purchase Details</h1>
     <p>Invoice Number:  {{ purchase_master.invoice_number }}</p>
     <p>Supplier: {{ purchase_master.supplier_id.name }}</p>
-    <p>Sub Total: ₹{{ purchase_master.sub_total }}/-</p>
     <p>Date & Time: {{ purchase_master.created_at }}</p>
+    <p>Sub Total: ₹{{ purchase_master.sub_total }}/-</p>
 
-    <h2 class='text-2xl mt-4'>Items</h2>
+    <h2 class='text-2xl mt-2'>Items</h2>
     <table class='table mt-1'>
         <thead>
             <tr>

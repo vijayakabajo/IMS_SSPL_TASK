@@ -14,7 +14,7 @@
         <div class="container-fluid">
             <div class="inline-flex">
                 <div>
-                    <a class="navbar-brand font-bold text-2xl mr-48 text-light" href="#">Inventory Management System</a>
+                    <a class="navbar-brand font-bold text-2xl mr-36 text-light italic font-mono ml-4 underline" title='Go to Homepage' href="{% url 'homepage'%}">Inventory Management System</a>
                 </div>
                 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -41,7 +41,7 @@
       </nav>
 
 
-    <div class="container-fluid bg-warning p-10" style="min-height: 100vh;">
+    <div class="container-fluid bg-primary-subtle p-4" style="min-height: 100vh;">
         {% block content %}
         <!--main page-->
         {% endblock %}

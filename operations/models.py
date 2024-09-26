@@ -47,6 +47,10 @@ class TempTable(models.Model):
     
 
 class SalesMaster(models.Model):
-    purchase_number = models.IntegerField(null=False, blank=False)
+    customer_name= models,models.CharField(max_length=50,blank=False, null=False)
+    bill_number = models.IntegerField(null=False, blank=False)
     item_id = models.CharField(max_length=100, null=False, blank=False)
     quantity = models.IntegerField(null=False, blank= False)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateField(auto_now_add=True)
+    status = models.SmallIntegerField(default=1, null= False)

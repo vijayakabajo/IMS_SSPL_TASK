@@ -88,10 +88,6 @@ def purchase_detail_view(request, pk):
 
 
 
-
-
-
-
     #-----------------------------------------------------sales page-------------------------------------------------
 
 def sales_page(request):
