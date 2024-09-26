@@ -15,7 +15,7 @@ def purchase_page(request):
     else:
         initial_data = {}
 
-    temp_items = TempTable.objects.all()  #temptable data
+    temp_items = TempTable.objects.all().order_by('-created_at')  #temptable data
 
 
     purchase_form = PurchaseMasterForm(initial=initial_data) 
@@ -74,8 +74,7 @@ def purchase_page(request):
 
 
 def purchase_master_list(request):
-    # Fetch all PurchaseMaster records
-    purchases = PurchaseMaster.objects.all()
+    purchases = PurchaseMaster.objects.all().order_by('-created_at')
     return render(request, 'purchase_master_list.html', {'purchases': purchases})
 
 def purchase_detail_view(request, pk):

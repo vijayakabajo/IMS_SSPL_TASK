@@ -13,7 +13,7 @@ def supplier_page(request):
 
 # Item Page
 def items_page(request):
-    items = Item.objects.filter(status=1)
+    items = Item.objects.filter(status=1).order_by('-created_At')
     return render(request, 'items_page.html', {'items': items})
 
 # Handle Supplier
