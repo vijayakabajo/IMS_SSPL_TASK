@@ -3,7 +3,9 @@
 <h1 class='text-3xl mb-4'>Purchase New Items</h1>
 <div class='container'>
 
-    <!-- First form to add items -->
+    <strong>Invoice No.:</strong>
+    <label class='mb-4'>{{ invoice_number }}</label><br>
+
     <form method="post" class='space-x-4'>
         {% csrf_token %}
         <label>Item:</label>
@@ -15,8 +17,15 @@
         {{ temp_form.item_id.errors }}
     </form>
 
+    <form method="post" class='space-x-4 mt-4'>
+        {% csrf_token %}
+        <label>Supplier:</label>
+        {{ purchase_form.supplier_id }}
+        <button class='btn btn-primary mt-2' type="submit" name="finalize_purchase">Finalize Purchase</button>
+    </form>
+
     <!-- Display added items -->
-    {% if temp_items.exists %}
+    {% comment %} {% if temp_items.exists %} {% endcomment %}
     <table class="table mt-4">
         <thead>
             <tr>
@@ -37,22 +46,12 @@
             {% endfor %}
         </tbody>
     </table>
-    {% endif %}
+    {% comment %} {% endif %} {% endcomment %}
 
-    <!-- Subtotal display -->
     <div>
         <strong>Subtotal: </strong> {{ sub_total }}
     </div>
 
-    <!-- Second form to finalize purchase -->
-    {% if temp_items.exists %}
-    <form method="post" class='space-x-4 mt-4'>
-        {% csrf_token %}
-        <label>Supplier:</label>
-        {{ purchase_form.supplier_id }}
-        <button class='btn btn-primary mt-2' type="submit" name="finalize_purchase">Finalize Purchase</button>
-    </form>
-    {% endif %}
 
 </div>
 {% endblock %}

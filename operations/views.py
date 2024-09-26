@@ -63,12 +63,21 @@ def purchase_page(request):
 
     sub_total = sum(item.items_total for item in temp_items)
 
+    last_invoice = PurchaseMaster.objects.order_by('invoice_number').last()
+    if last_invoice and last_invoice.invoice_number.startswith('INV-'):
+        last_invoice_num = int(last_invoice.invoice_number.split('-')[1])
+        invoice_number = f"INV-{last_invoice_num + 1}"
+    else:
+        new_invoice_num = 1000
+        invoice_number = f"INV-{new_invoice_num}"
+
     context = {
         'purchase_form': purchase_form,
         'temp_form': temp_form,
         'temp_items': temp_items,
         'sub_total': sub_total,
-    }    #to pass it to the template
+        'invoice_number': invoice_number,
+    } 
     return render(request, 'purchase.html', context)
 
 
