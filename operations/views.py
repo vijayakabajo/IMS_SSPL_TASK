@@ -3,6 +3,7 @@ from django.db import transaction
 from .models import PurchaseMaster, PurchaseDetail, TempTable
 from master.models import Supplier, Item
 from .forms import TempTableForm, PurchaseMasterForm
+from django.http import JsonResponse
 
 
 
@@ -16,13 +17,10 @@ def purchase_page(request):
         initial_data = {}
 
     temp_items = TempTable.objects.all().order_by('-created_at')  #temptable data
-
-
-    purchase_form = PurchaseMasterForm(initial=initial_data) 
+    purchase_form = PurchaseMasterForm(initial=initial_data)
     temp_form = TempTableForm()
 
     if request.method == 'POST':
-        # Adding items to temptable
         if 'add_item' in request.POST:
             temp_form = TempTableForm(request.POST)
             if temp_form.is_valid():
@@ -30,6 +28,7 @@ def purchase_page(request):
                 temp_item.items_total = temp_item.item_id.price * temp_item.quantity
                 temp_item.save()
                 
+                # Retain supplier selection
                 supplier_id = request.POST.get('supplier_id')
                 request.session['supplier_id'] = supplier_id
                 
@@ -93,6 +92,15 @@ def purchase_detail_view(request, pk):
     purchase_details = PurchaseDetail.objects.filter(purchase_master=purchase_master)
     return render(request, 'purchase_detail_view.html', {'purchase_master': purchase_master, 'purchase_details': purchase_details})
 
+# Ajax endpoint to get item price
+def get_item_price(request, item_id):
+    item = get_object_or_404(Item, id=item_id)
+    return JsonResponse({'price': item.price})
+
+# Ajax endpoint to get supplier details
+def get_supplier_details(request, supplier_id):
+    supplier = get_object_or_404(Supplier, id=supplier_id)
+    return JsonResponse({'supplier_name': supplier.name, 'supplier_contact': supplier.contact})  # Add any other details needed
 
 
 
