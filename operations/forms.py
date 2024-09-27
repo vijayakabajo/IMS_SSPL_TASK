@@ -19,6 +19,12 @@ class TempTableForm(forms.ModelForm):
         if TempTable.objects.filter(item_id=item_id).exists():
             raise forms.ValidationError("Item already exists in the List.")
         return item_id
+    
+    def clean_quantity(self):
+        quantity = self.cleaned_data.get('quantity')
+        if quantity <= 0:
+            raise forms.ValidationError("Quantity must be greater than 0.")
+        return quantity
 
 class PurchaseMasterForm(forms.ModelForm):
     class Meta:

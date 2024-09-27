@@ -80,11 +80,12 @@ def purchase_page(request):
     return render(request, 'purchase.html', context)
 
 
-
+#Purchase Master Page
 def purchase_master_list(request):
     purchases = PurchaseMaster.objects.all().order_by('-created_at')
     return render(request, 'purchase_master_list.html', {'purchases': purchases})
 
+#Purchase Detail Page
 def purchase_detail_view(request, pk):
     # Fetch the specific PurchaseMaster by its primary key
     purchase_master = get_object_or_404(PurchaseMaster, pk=pk)
@@ -92,12 +93,12 @@ def purchase_detail_view(request, pk):
     purchase_details = PurchaseDetail.objects.filter(purchase_master=purchase_master)
     return render(request, 'purchase_detail_view.html', {'purchase_master': purchase_master, 'purchase_details': purchase_details})
 
-# Ajax endpoint to get item price
+# item price
 def get_item_price(request, item_id):
     item = get_object_or_404(Item, id=item_id)
     return JsonResponse({'price': item.price})
 
-# Ajax endpoint to get supplier details
+# supplier details
 def get_supplier_details(request, supplier_id):
     supplier = get_object_or_404(Supplier, id=supplier_id)
     return JsonResponse({'supplier_name': supplier.name, 'supplier_contact': supplier.contact})  # Add any other details needed

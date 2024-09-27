@@ -2,8 +2,17 @@
 {% block content %}
 <h1 class='text-3xl mb-4'>Purchase New Items</h1>
 <div class='container'>
-    <strong>Invoice No.:</strong>
-    <label class='mb-4'>{{ invoice_number }}</label><br>
+    <strong>Invoice No:</strong>
+    <label>{{ invoice_number }}</label><br>
+
+
+    <form id="supplier-form" method="post" class='space-x-4 mt-4'>
+        {% csrf_token %}
+        <label>Supplier:</label>
+        {{ purchase_form.supplier_id }}
+        <div id="supplier-details"></div> <!-- Supplier details display --> 
+        <button class='btn btn-primary mt-2' id="finalizePurchaseBtn" type="submit" name="finalize_purchase">Finalize Purchase</button>
+    </form>
 
     <form id="item-form" method="post" class='space-x-4'>
         {% csrf_token %}
@@ -16,16 +25,10 @@
 
         <button class='btn btn-primary' type="submit" name="add_item">Add Item</button>
         {{ temp_form.item_id.errors }}
+        {{ temp_form.quantity.errors }}
     </form>
 
-    <form id="supplier-form" method="post" class='space-x-4 mt-4'>
-        {% csrf_token %}
-        <label>Supplier:</label>
-        {{ purchase_form.supplier_id }}
-        <div id="supplier-details"></div> <!-- Supplier details display -->
-        
-        <button class='btn btn-primary mt-2' id="finalizePurchaseBtn" type="submit" name="finalize_purchase">Finalize Purchase</button>
-    </form>
+
 
     <!-- Display added items -->
     <table class="table mt-4">
