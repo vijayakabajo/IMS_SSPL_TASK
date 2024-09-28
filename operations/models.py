@@ -3,14 +3,15 @@ from master.models import Supplier, Item
 from django.core.validators import RegexValidator
 
 
-#-------------------------------------Purchase Models----------------------------------------------------------
+#-----------------------------------------------Purchase Models----------------------------------------------------------
 
 class PurchaseMaster(models.Model):
     invoice_number = models.CharField(max_length=20, unique=True, blank=True, null=True)
-    supplier_id = models.ForeignKey(Supplier, on_delete=models.CASCADE)  
+    supplier_id = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     sub_total = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True) 
     status = models.SmallIntegerField(default=1, null=False)
+    
 
     def save(self, *args, **kwargs):
         if not self.invoice_number:

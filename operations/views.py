@@ -4,64 +4,74 @@ from .models import PurchaseMaster, PurchaseDetail, TempTable
 from master.models import Supplier, Item
 from .forms import TempTableForm, PurchaseMasterForm
 from django.http import JsonResponse
+from django.contrib import messages
 
 
 
 #------------------------------------------purchase page--------------------------------------------------------
 
+from django.contrib import messages  # Import the messages framework
+
 def purchase_page(request):
-    supplier_id = request.session.get('supplier_id', None)   
+    supplier_id = request.session.get('supplier_id', None)
     if supplier_id:
         initial_data = {'supplier_id': supplier_id}
     else:
         initial_data = {}
 
-    temp_items = TempTable.objects.all().order_by('-created_at')  #temptable data
+    temp_items = TempTable.objects.all().order_by('-created_at')  # Fetch temp table data
     purchase_form = PurchaseMasterForm(initial=initial_data)
     temp_form = TempTableForm()
 
     if request.method == 'POST':
+        # Add item to temp table
         if 'add_item' in request.POST:
             temp_form = TempTableForm(request.POST)
             if temp_form.is_valid():
                 temp_item = temp_form.save(commit=False)
                 temp_item.items_total = temp_item.item_id.price * temp_item.quantity
                 temp_item.save()
-                
+
                 # Retain supplier selection
                 supplier_id = request.POST.get('supplier_id')
                 request.session['supplier_id'] = supplier_id
-                
+
                 return redirect('purchase-page')
 
-        # Finalize
+        # Finalize purchase
         if 'finalize_purchase' in request.POST:
-            purchase_form = PurchaseMasterForm(request.POST)
-            if purchase_form.is_valid():  # Validate only PurchaseMasterForm
-                with transaction.atomic():
-                    purchase_master = purchase_form.save(commit=False)
-                    
-                    #sub_total
-                    purchase_master.sub_total = sum(item.items_total for item in temp_items)
-                    purchase_master.save()
+            # Check if temp table is empty before processing the purchase
+            if not temp_items.exists():
+                messages.error(request, "Add items to the purchase list before finalizing.")
+            else:
+                purchase_form = PurchaseMasterForm(request.POST)
+                if purchase_form.is_valid():  # Validate only PurchaseMasterForm
+                    with transaction.atomic():
+                        purchase_master = purchase_form.save(commit=False)
+                        # Calculate subtotal
+                        purchase_master.sub_total = sum(item.items_total for item in temp_items)
+                        purchase_master.save()
 
-                    for temp_item in temp_items:
-                        PurchaseDetail.objects.create(
-                            purchase_master=purchase_master,
-                            item_id=temp_item.item_id,
-                            quantity=temp_item.quantity,
-                            items_total=temp_item.items_total
-                        )
+                        # Move items from TempTable to PurchaseDetail
+                        for temp_item in temp_items:
+                            PurchaseDetail.objects.create(
+                                purchase_master=purchase_master,
+                                item_id=temp_item.item_id,
+                                quantity=temp_item.quantity,
+                                items_total=temp_item.items_total
+                            )
 
-                    TempTable.objects.all().delete()
-                    
-                    if 'supplier_id' in request.session:
-                        del request.session['supplier_id']
+                        # Clear the TempTable after purchase
+                        TempTable.objects.all().delete()
 
-                return redirect('purchase-page')
+                        if 'supplier_id' in request.session:
+                            del request.session['supplier_id']
+
+                    return redirect('purchase-page')
 
     sub_total = sum(item.items_total for item in temp_items)
 
+    # Generate new invoice number
     last_invoice = PurchaseMaster.objects.order_by('invoice_number').last()
     if last_invoice and last_invoice.invoice_number.startswith('INV-'):
         last_invoice_num = int(last_invoice.invoice_number.split('-')[1])
@@ -76,8 +86,9 @@ def purchase_page(request):
         'temp_items': temp_items,
         'sub_total': sub_total,
         'invoice_number': invoice_number,
-    } 
+    }
     return render(request, 'purchase.html', context)
+
 
 
 #Purchase Master Page

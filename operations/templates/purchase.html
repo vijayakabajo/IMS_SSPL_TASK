@@ -2,59 +2,88 @@
 {% block content %}
 <h1 class='text-3xl mb-4'>Purchase New Items</h1>
 <div class='container'>
-    <strong>Invoice No:</strong>
-    <label>{{ invoice_number }}</label><br>
 
-
-    <form id="supplier-form" method="post" class='space-x-4 mt-4'>
+    <!-- Combined Form -->
+    <form id="purchase-form" method="post">
         {% csrf_token %}
-        <label>Supplier:</label>
+        
+        <!-- Invoice No -->
+        <strong>Invoice No:</strong>
+        <label>{{ invoice_number }}</label><br>
+        
+        <!-- Supplier form fields -->
+        <label class='mt-2'>Supplier:</label>
         {{ purchase_form.supplier_id }}
-        <div id="supplier-details"></div> <!-- Supplier details display --> 
-        <button class='btn btn-primary mt-2' id="finalizePurchaseBtn" type="submit" name="finalize_purchase">Finalize Purchase</button>
-    </form>
+        {{ purchase_form.supplier_id.errors }}
+        <div id="supplier-details"></div> <!-- Supplier details display -->
+        
 
-    <form id="item-form" method="post" class='space-x-4'>
-        {% csrf_token %}
-        <label>Item:</label>
+    <div class='space-x-8 mt-8'>
+            <!-- Item form fields -->
+        <label class=''>Item:</label>
         {{ temp_form.item_id }}
-        <span id="item-price"></span>  <!-- Display item price -->
+        <strong><span id="item-price"></span></strong>  <!-- Display item price -->
+        
         <label>Quantity:</label>
         {{ temp_form.quantity }}
-        <span id="item-total"></span>  <!-- Display item total -->
+        <strong><span id="item-total"></span></strong>  <!-- Display item total -->
+        
+        <!-- Button to add item -->
+        <button class="btn btn-primary py-1" type="submit" name="add_item">Add Item</button>
 
-        <button class='btn btn-primary' type="submit" name="add_item">Add Item</button>
+    </div>
+        
         {{ temp_form.item_id.errors }}
         {{ temp_form.quantity.errors }}
+
+
+        {% if messages %}
+    <div class="alert alert-danger mt-2">
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+
+        <!-- Table to show added items -->
+        <table class="table mt-3">
+            <thead>
+                <tr>
+                    <th scope="col">Sl. No.</th>
+                    <th scope="col">Item</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in temp_items %}
+                <tr>
+                    <td scope="row">{{ forloop.counter }}</td>
+                    <td>{{ item.item_id.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.items_total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class='flex justify-end mr-2'>
+            <strong>Subtotal:</strong><span class='ml-1'> {{ sub_total }}</span>
+        </div>
+
+        <!-- Finalize Purchase Button at the Bottom -->
+         <div class='flex justify-between mt-4 mx-2'>
+                <button class="btn btn-primary" type="submit" name="finalize_purchase" id="finalizePurchaseBtn">Finalize Purchase</button>
+                <a href="{% url 'purchase_master_list' %}" class='btn btn-secondary'><< Purchase List</a>
+         </div>
+
     </form>
 
+    
 
-
-    <!-- Display added items -->
-    <table class="table mt-4">
-        <thead>
-            <tr>
-                <th scope="col">Sl. No.</th>
-                <th scope="col">Item</th>
-                <th scope="col">Quantity</th>
-                <th scope="col">Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in temp_items %}
-            <tr>
-                <td scope="row">{{ forloop.counter }}</td>
-                <td>{{ item.item_id.name }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>{{ item.items_total }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <div>
-        <strong>Subtotal: </strong> {{ sub_total }}
-    </div>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -93,31 +122,15 @@
                 $('#item-total').text('');
             }
         }
-
-        // Fetch supplier details when a supplier is selected
     });
 </script>
 
 <script>
-    // Store and retrieve selected supplier using local storage
-    document.addEventListener("DOMContentLoaded", function () {
-        const supplierSelect = document.getElementById('id_supplier_id');
-        const finalizePurchaseBtn = document.getElementById('finalizePurchaseBtn');
-    
-        // Set the supplier on page load if available in localStorage
-        const storedSupplier = localStorage.getItem('selectedSupplier');
-        if (storedSupplier) {
-            supplierSelect.value = storedSupplier;
-        }
-    
-        // Store selected supplier in local storage when changed
-        supplierSelect.addEventListener('change', function () {
-            localStorage.setItem('selectedSupplier', this.value);
-        });
-    
-        // Clear localStorage when 'Finalize Purchase' button is clicked
-        finalizePurchaseBtn.addEventListener('click', function () {
-            localStorage.removeItem('selectedSupplier'); // Or use localStorage.clear() to remove everything
+    $(document).ready(function() {
+        $('#finalizePurchaseBtn').click(function() {
+            // Disable item fields when finalizing the purchase
+            $('#id_item_id').prop('disabled', true);
+            $('#id_quantity').prop('disabled', true);
         });
     });
 </script>
