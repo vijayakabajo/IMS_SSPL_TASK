@@ -10,10 +10,12 @@ from django.contrib import messages
 
 #------------------------------------------purchase page--------------------------------------------------------
 
-from django.contrib import messages  # Import the messages framework
 
 def purchase_page(request):
     supplier_id = request.session.get('supplier_id', None)
+    supplier_name = request.session.get('supplier_name', '')
+    supplier_contact = request.session.get('supplier_contact', '')
+
     if supplier_id:
         initial_data = {'supplier_id': supplier_id}
     else:
@@ -32,9 +34,12 @@ def purchase_page(request):
                 temp_item.items_total = temp_item.item_id.price * temp_item.quantity
                 temp_item.save()
 
-                # Retain supplier selection
+                # Retain supplier selection and store details in the session
                 supplier_id = request.POST.get('supplier_id')
+                supplier = Supplier.objects.get(id=supplier_id)
                 request.session['supplier_id'] = supplier_id
+                request.session['supplier_name'] = supplier.name
+                request.session['supplier_contact'] = supplier.contact_number
 
                 return redirect('purchase-page')
 
@@ -64,10 +69,15 @@ def purchase_page(request):
                         # Clear the TempTable after purchase
                         TempTable.objects.all().delete()
 
+                        # Clear the supplier data from the session
                         if 'supplier_id' in request.session:
                             del request.session['supplier_id']
+                        if 'supplier_name' in request.session:
+                            del request.session['supplier_name']
+                        if 'supplier_contact' in request.session:
+                            del request.session['supplier_contact']
 
-                    return redirect('purchase-page')
+                    return redirect('purchase_master_list')
 
     sub_total = sum(item.items_total for item in temp_items)
 
@@ -86,8 +96,11 @@ def purchase_page(request):
         'temp_items': temp_items,
         'sub_total': sub_total,
         'invoice_number': invoice_number,
+        'supplier_name': supplier_name,
+        'supplier_contact': supplier_contact,
     }
     return render(request, 'purchase.html', context)
+
 
 
 
@@ -112,13 +125,35 @@ def get_item_price(request, item_id):
 # supplier details
 def get_supplier_details(request, supplier_id):
     supplier = get_object_or_404(Supplier, id=supplier_id)
-    return JsonResponse({'supplier_name': supplier.name, 'supplier_contact': supplier.contact})  # Add any other details needed
+    return JsonResponse({'supplier_name': supplier.name, 'supplier_contact': supplier.contact_number})
+
+#remove item from temp table
+from django.http import JsonResponse
+
+def remove_item(request, item_id):
+    if request.method == 'POST':
+        try:
+            temp_item = TempTable.objects.get(id=item_id)
+            temp_item.delete()
+
+            # Calculate the updated subtotal
+            temp_items = TempTable.objects.all()  # Filter according to your context
+            sub_total = sum(item.items_total for item in temp_items)
+
+            # Return a JSON response with success and the updated subtotal
+            return JsonResponse({'success': True, 'sub_total': sub_total})
+
+        except TempTable.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Item not found.'})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request.'})
 
 
 
     #-----------------------------------------------------sales page-------------------------------------------------
 
 def sales_page(request):
+    
 
 
 

@@ -1,9 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
+
+
+
+
+
 <h1 class='text-3xl mb-4'>Purchase New Items</h1>
 <div class='container'>
 
-    <!-- Combined Form -->
     <form id="purchase-form" method="post">
         {% csrf_token %}
         
@@ -12,19 +16,26 @@
         <label>{{ invoice_number }}</label><br>
         
         <!-- Supplier form fields -->
-        <label class='mt-2'>Supplier:</label>
+        <strong><label class='mt-2'>Supplier:</label></strong>
         {{ purchase_form.supplier_id }}
         {{ purchase_form.supplier_id.errors }}
-        <div id="supplier-details"></div> <!-- Supplier details display -->
+
+                <!-- Supplier details will be displayed here -->
+                <div id="supplier-details" class="mt-2">
+                    {% if supplier_name and supplier_contact %}
+                        <strong>Supplier Name:</strong> {{ supplier_name }}<br>
+                        <strong>Contact Number:</strong> {{ supplier_contact }}
+                    {% endif %}
+                </div>
         
 
-    <div class='space-x-8 mt-8'>
+    <div class='sm:space-x-8 mt-8 '>
             <!-- Item form fields -->
-        <label class=''>Item:</label>
+        <strong><label class=''>Item:</label></strong>
         {{ temp_form.item_id }}
         <strong><span id="item-price"></span></strong>  <!-- Display item price -->
         
-        <label>Quantity:</label>
+        <strong><label>Quantity:</label></strong>
         {{ temp_form.quantity }}
         <strong><span id="item-total"></span></strong>  <!-- Display item total -->
         
@@ -56,28 +67,33 @@
                     <th scope="col">Item</th>
                     <th scope="col">Quantity</th>
                     <th scope="col">Total</th>
+                    <th scope="col">Action</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in temp_items %}
-                <tr>
+                <tr id="item-row-{{ item.id }}">
                     <td scope="row">{{ forloop.counter }}</td>
                     <td>{{ item.item_id.name }}</td>
                     <td>{{ item.quantity }}</td>
                     <td>{{ item.items_total }}</td>
+                    <td>
+                        <button class="btn btn-danger remove-item-btn" data-item-id="{{ item.id }}">Remove</button>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
+            
         </table>
 
         <div class='flex justify-end mr-2'>
-            <strong>Subtotal:</strong><span class='ml-1'> {{ sub_total }}</span>
+            <strong>Subtotal:</strong><span id='subtotal' class='ml-1'>{{ sub_total }}</span>
         </div>
 
         <!-- Finalize Purchase Button at the Bottom -->
          <div class='flex justify-between mt-4 mx-2'>
                 <button class="btn btn-primary" type="submit" name="finalize_purchase" id="finalizePurchaseBtn">Finalize Purchase</button>
-                <a href="{% url 'purchase_master_list' %}" class='btn btn-secondary'><< Purchase List</a>
+                <a href="{% url 'purchase_master_list' %}" class='btn btn-info'><< Purchase List</a>
          </div>
 
     </form>
@@ -85,6 +101,13 @@
     
 
 </div>
+
+
+
+
+
+
+{% comment %} ---------------------------------------------------scripts--------------------------------------------- {% endcomment %}
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
@@ -122,17 +145,73 @@
                 $('#item-total').text('');
             }
         }
+
+        $('#id_supplier_id').change(function() {
+            let supplierId = $(this).val();  // Get the selected supplier ID
+            if (supplierId) {
+                $.ajax({
+                    url: '/get-supplier-details/' + supplierId + '/',  // URL to get supplier details
+                    success: function(data) {
+                        // Display supplier details in the #supplier-details div
+                        $('#supplier-details').html(
+                            '<strong>Supplier Name:</strong> ' + data.supplier_name + '<br>' +
+                            '<strong>Contact Number:</strong> ' + data.supplier_contact
+                        );
+                    },
+                    error: function() {
+                        // Handle errors if AJAX request fails
+                        $('#supplier-details').html('<strong>Error fetching supplier details</strong>');
+                    }
+                });
+            } else {
+                // Clear supplier details if no supplier is selected
+                $('#supplier-details').html('');
+            }
+        });
     });
 </script>
 
 <script>
     $(document).ready(function() {
         $('#finalizePurchaseBtn').click(function() {
-            // Disable item fields when finalizing the purchase
             $('#id_item_id').prop('disabled', true);
             $('#id_quantity').prop('disabled', true);
         });
     });
 </script>
+
+<script>
+    $(document).ready(function() {
+        $('.remove-item-btn').click(function(e) {
+            e.preventDefault();
+            const itemId = $(this).data('item-id');
+            const url = '/remove-item/' + itemId + '/';
+    
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',  // CSRF token for security
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Remove the table row
+                        $('#item-row-' + itemId).remove();
+    
+                        // Update the subtotal
+                        $('#subtotal').text(response.sub_total.toFixed(2));
+                    } else {
+                        alert('Error: ' + response.error);
+                    }
+                },
+                error: function() {
+                    alert('Error removing item.');
+                }
+            });
+        });
+    });
+    
+</script>
+
 
 {% endblock %}

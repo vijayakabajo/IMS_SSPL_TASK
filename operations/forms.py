@@ -35,3 +35,31 @@ class PurchaseMasterForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['supplier_id'].queryset = Supplier.objects.filter(status=1)
         self.fields['supplier_id'].label = "Supplier"
+
+
+
+
+# ------------------------------------------------Sales forrm------------------------------------------------
+
+
+
+from django import forms
+from .models import SalesMaster, SalesDetail
+
+class SalesForm(forms.ModelForm):
+    class Meta:
+        model = SalesMaster
+        fields = ['seller', 'bill_date', 'sub_total']
+
+class SalesDetailForm(forms.ModelForm):
+    class Meta:
+        model = SalesDetail
+        fields = ['item', 'item_price', 'quantity', 'items_total']
+
+    def clean_quantity(self):
+        quantity = self.cleaned_data['quantity']
+        item = self.cleaned_data['item']
+
+        if quantity > item.quantity:
+            raise forms.ValidationError(f"Cannot sell more than {item.quantity} available.")
+        return quantity
