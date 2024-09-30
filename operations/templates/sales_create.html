@@ -1,0 +1,61 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h2>Create Sale</h2>
+<form method="post">
+    {% csrf_token %}
+    <div>
+        <label for="seller">Seller:</label>
+        {{ master_form.seller }}
+    </div>
+
+    <div>
+        <label for="bill_date">Bill Date:</label>
+        {{ master_form.bill_date }}
+    </div>
+
+    <h3>Sales Details</h3>
+
+    <div>
+        <label for="item">Item:</label>
+        {{ detail_form.item }}
+    </div>
+
+    <div>
+        <label for="item_price">Price:</label>
+        {{ detail_form.item_price }}
+    </div>
+
+    <div>
+        <label for="quantity">Quantity:</label>
+        {{ detail_form.quantity }}
+    </div>
+
+    <button type="submit">Submit</button>
+</form>
+
+{% if temp_sales %}
+<h3>Temp Sales</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sale in temp_sales %}
+        <tr>
+            <td>{{ sale.item.name }}</td>
+            <td>{{ sale.item_price }}</td>
+            <td>{{ sale.quantity }}</td>
+            <td>{{ sale.items_total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% endblock %}

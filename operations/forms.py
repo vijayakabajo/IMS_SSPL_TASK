@@ -1,6 +1,6 @@
 # forms.py
 from django import forms
-from .models import TempTable, PurchaseMaster
+from .models import TempTable, PurchaseMaster, SalesMaster, SalesDetail
 from master.models import Supplier, Item
 
 class TempTableForm(forms.ModelForm):
@@ -43,23 +43,23 @@ class PurchaseMasterForm(forms.ModelForm):
 
 
 
-from django import forms
-from .models import SalesMaster, SalesDetail
-
-class SalesForm(forms.ModelForm):
+class SalesMasterForm(forms.ModelForm):
     class Meta:
         model = SalesMaster
-        fields = ['seller', 'bill_date', 'sub_total']
+        fields = ['seller', 'bill_date']
 
 class SalesDetailForm(forms.ModelForm):
     class Meta:
         model = SalesDetail
-        fields = ['item', 'item_price', 'quantity', 'items_total']
+        fields = ['item', 'item_price', 'quantity']
 
+    # Custom validation to ensure quantity doesn't exceed stock
     def clean_quantity(self):
-        quantity = self.cleaned_data['quantity']
-        item = self.cleaned_data['item']
+        item = self.cleaned_data.get('item')
+        quantity = self.cleaned_data.get('quantity')
 
-        if quantity > item.quantity:
-            raise forms.ValidationError(f"Cannot sell more than {item.quantity} available.")
+        if quantity > item.stock_quantity:
+            raise forms.ValidationError(f"Only {item.stock_quantity} items are available in stock for {item.name}.")
         return quantity
+
+

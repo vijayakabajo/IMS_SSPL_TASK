@@ -1,14 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
-from .models import PurchaseMaster, PurchaseDetail, TempTable
+from .models import PurchaseMaster, PurchaseDetail, TempTable, SalesDetail, SalesTempTable, SalesMaster
 from master.models import Supplier, Item
-from .forms import TempTableForm, PurchaseMasterForm
+from .forms import TempTableForm, PurchaseMasterForm, SalesMasterForm , SalesDetailForm
 from django.http import JsonResponse
 from django.contrib import messages
 
 
 
-#------------------------------------------purchase page--------------------------------------------------------
+#-----------------------------------------------------purchase page--------------------------------------------------------
 
 
 def purchase_page(request):
@@ -152,13 +152,48 @@ def remove_item(request, item_id):
 
     #-----------------------------------------------------sales page-------------------------------------------------
 
-def sales_page(request):
-    
+def sales_create(request):
+    suppliers = Supplier.objects.filter(status=1)  # Fetch only active suppliers
+    items = Item.objects.filter(status=1)  # Fetch only active items
+    temp_sales = SalesTempTable.objects.all()  # Fetch all temp sales
 
+    if request.method == 'POST':
+        master_form = SalesMasterForm(request.POST)
+        detail_form = SalesDetailForm(request.POST)
 
+        if master_form.is_valid() and detail_form.is_valid():
+            # Save the SalesMaster instance
+            sales_master = master_form.save()
 
+            # Validate if quantity is available in stock
+            item = detail_form.cleaned_data['item']
+            quantity = detail_form.cleaned_data['quantity']
+            if quantity > item.stock_quantity:
+                messages.error(request, f"Quantity for {item.name} exceeds available stock.")
+                return redirect('sales:create')
+
+            # Save SalesDetail data
+            sales_detail = detail_form.save(commit=False)
+            sales_detail.sales_master = sales_master
+            sales_detail.items_total = sales_detail.item_price * sales_detail.quantity
+            sales_detail.save()
+
+            # Update subtotal in SalesMaster
+            subtotal = SalesDetail.objects.filter(sales_master=sales_master).aggregate(Sum('items_total'))['items_total__sum']
+            sales_master.sub_total = subtotal
+            sales_master.save()
+
+            messages.success(request, 'Sale recorded successfully!')
+            return redirect('sales:create')
+    else:
+        master_form = SalesMasterForm()
+        detail_form = SalesDetailForm()
 
     context = {
-
-    }    
-    return render(request, 'sales.html', context)
+        'suppliers': suppliers,
+        'items': items,
+        'temp_sales': temp_sales,
+        'master_form': master_form,
+        'detail_form': detail_form,
+    }
+    return render(request, 'sales_create.html', context)
