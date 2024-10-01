@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h1 class="mb-3 text-3xl">Detailed List :</h1>
+
+<div class="container d-flex my-4 align-items-center">
+
+    <div class="d-flex">
+        <div class="mx-3">
+            <strong><label for="from_date">From Date:</label></strong>
+            <input id="from_date" type="date">
+        </div>
+
+        <div class="mx-5">
+            <strong><label for="to_date">To Date:</label></strong>
+            <input id="to_date" type="date">
+        </div>
+    </div>
+
+    <div class="mx-3">
+        <strong><label for="item">Item</label></strong>
+        <select id="item" onchange="filterData()">
+            <option value="">All</option>
+            {% for item in items %}
+            <option value="{{ item.name }}">{{ item.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="dropdown mx-3">
+        <strong>Type</strong>
+        <button class="btn dropdown-toggle" type="button" id="reportsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            Select Type
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
+            <li><a class="dropdown-item" href="#" onclick="changeType('purchase')">Purchase</a></li>
+            <li><a class="dropdown-item" href="#" onclick="changeType('sales')">Sales</a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- Detail Table -->
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">S.No.</th>
+            <th scope="col">Item Name</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Total</th>
+            <th scope="col">Date</th>
+            <th scope="col">Supplier/Customer</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider" id="stockTableBody">
+        <!-- Data to be filled via JavaScript or Django rendering -->
+        {% if stock_data %}
+        {% for stock in stock_data %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ stock.item_name }}</td>
+            <td>{{ stock.quantity }}</td>
+            <td>{{ stock.total }}</td>
+            <td>{{ stock.created_at }}</td>
+            <td>{{ stock.supplier_or_customer }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="6">No Items Available</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<script>
+    let selectedType = '';
+
+    function changeType(type) {
+        selectedType = type;
+        filterData();
+    }
+
+    function filterData() {
+        const fromDate = document.getElementById('from_date').value;
+        const toDate = document.getElementById('to_date').value;
+        const item = document.getElementById('item').value;
+
+        // Redirect to the filtered page with parameters
+        window.location.href = `?type=${selectedType}&item=${item}&fromdate=${fromDate}&todate=${toDate}`;
+    }
+</script>
+
+{% endblock %}
