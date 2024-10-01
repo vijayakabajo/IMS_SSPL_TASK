@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+{% block content %}
+
+<h1 class='text-3xl'>Sales Details</h1>
+<p>Bill Number: {{ sales_master.bill_number }}</p>
+<p>Seller: {{ sales_master.seller.name }}</p>
+<p>Date & Time: {{ sales_master.created_at }}</p>
+<p>Sub Total: ₹{{ sales_master.sub_total }}/-</p>
+
+<h2 class='text-2xl mt-2'>Items</h2>
+<table class='table mt-1'>
+    <thead>
+        <tr>
+            <th>Item Name</th>
+            <th>Quantity</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for detail in sales_details %}
+        <tr>
+            <td>{{ detail.item.name }}</td>
+            <td>{{ detail.quantity }}</td>
+            <td>₹{{ detail.items_total }}/-</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'sales_master_list' %}" class='btn btn-primary'><< Sales List</a>
+
+{% endblock %}

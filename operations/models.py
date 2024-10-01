@@ -77,7 +77,6 @@ class SalesMaster(models.Model):
 
 class SalesDetail(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    item_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.IntegerField(null=False, blank=False)
     items_total = models.DecimalField(max_digits=10, decimal_places=2)
     sales_master = models.ForeignKey(SalesMaster, on_delete=models.CASCADE, related_name='sales_details')
@@ -89,10 +88,10 @@ class SalesDetail(models.Model):
 
 class SalesTempTable(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    item_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.IntegerField(null=False, blank=False)
     items_total = models.DecimalField(max_digits=10, decimal_places=2)
-    sales_master = models.ForeignKey(SalesMaster, on_delete=models.CASCADE, related_name='sales_details_temp')
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.SmallIntegerField(default=1, null=False)
 
     def __str__(self):
         return f"{self.item} - {self.quantity}"
