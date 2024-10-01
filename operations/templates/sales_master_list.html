@@ -9,6 +9,7 @@
 <table class='table mt-4'>
     <thead>
         <tr>
+            <th>Sl No.</th>
             <th>Bill No.</th>
             <th>Seller</th>
             <th>Sub Total</th>
@@ -19,6 +20,7 @@
     <tbody>
         {% for sale in sales %}
         <tr>
+            <td scope="row">{{ forloop.counter }}</td>
             <td>{{ sale.bill_number }}</td>
             <td>{{ sale.seller.name }}</td>
             <td>₹{{ sale.sub_total }}/-</td>

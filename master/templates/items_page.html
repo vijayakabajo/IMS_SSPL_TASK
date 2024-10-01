@@ -11,6 +11,7 @@
     <table class="table table-striped table-bordered">
         <thead class="thead-dark">
             <tr>
+                <th>Sl No.</th>
                 <th>Name</th>
                 <th>Price</th>
                 <th>Image</th>
@@ -22,6 +23,7 @@
             {% for item in items %}
                 {% if item.status %}
                 <tr>
+                    <td scope="row">{{ forloop.counter }}</td>
                     <td>{{ item.name }}</td>
                     <td>₹{{ item.price }}</td>
                     <td class='flex items-center justify-center'>

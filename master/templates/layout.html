@@ -14,7 +14,7 @@
         <div class="container-fluid">
             <div class="inline-flex">
                 <div>
-                    <a class="navbar-brand font-bold text-2xl mr-36 text-light italic font-mono ml-4 underline" title='Go to Homepage' href="{% url 'homepage'%}">Inventory Management System</a>
+                    <a class="navbar-brand font-bold text-3xl mr-36 text-light italic ml-4" title='Go to Homepage' href="{% url 'homepage'%}">Inventory Management System</a>
                 </div>
                 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -32,7 +32,10 @@
                       <a class="nav-link text-light" href="{% url 'sales_master_list' %}">Sales</a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link text-light" href="#">Report</a>
+                      <a class="nav-link text-light" href="{% url 'report_page'%}">Stock Report</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link text-light" href="#">Items Report</a>
                     </li>
                   </ul>
                 </div>

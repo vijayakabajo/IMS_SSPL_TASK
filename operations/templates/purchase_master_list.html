@@ -9,6 +9,7 @@
     <table class='table mt-4'>
         <thead>
             <tr>
+                <th>Sl No.</th>
                 <th>Invoice No.</th>
                 <th>Supplier</th>
                 <th>Sub Total</th>
@@ -19,6 +20,7 @@
         <tbody>
             {% for purchase in purchases %}
             <tr>
+                <td scope="row">{{ forloop.counter }}</td>
                 <td>{{ purchase.invoice_number }}</td>
                 <td>{{ purchase.supplier_id.name }}</td>
                 <td>₹{{ purchase.sub_total }}/-</td>

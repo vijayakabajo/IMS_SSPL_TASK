@@ -1,7 +1,9 @@
 # forms.py
 from django import forms
-from .models import TempTable, PurchaseMaster, SalesMaster, SalesTempTable
+from .models import TempTable, PurchaseMaster, SalesMaster, SalesTempTable, SalesDetail, PurchaseDetail
 from master.models import Supplier, Item
+from django.core.exceptions import ValidationError
+from django.db.models import Sum
 
 
 class PurchaseMasterForm(forms.ModelForm):
@@ -73,10 +75,23 @@ class SalesTempForm(forms.ModelForm):
         if SalesTempTable.objects.filter(item=item).exists():
             raise forms.ValidationError("Item already exists in the List.")
         return item
-    
+
     def clean_quantity(self):
         quantity = self.cleaned_data.get('quantity')
+        item = self.cleaned_data.get('item')
+
         if quantity <= 0:
             raise forms.ValidationError("Quantity must be greater than 0.")
+
+        # Calculate the available stock
+        total_purchased = PurchaseDetail.objects.filter(item_id_id=item).aggregate(total=Sum('quantity'))['total'] or 0
+        total_sold = SalesDetail.objects.filter(item_id=item).aggregate(total=Sum('quantity'))['total'] or 0
+        available_stock = total_purchased - total_sold
+
+        # Validate that the quantity does not exceed available stock
+        if quantity > available_stock:
+
+            raise ValidationError(f"The quantity cannot exceed the available stock")
+
         return quantity
 

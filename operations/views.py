@@ -28,7 +28,6 @@ def purchase_page(request):
     temp_form = TempTableForm()
 
     if request.method == 'POST':
-        # Add item to temp table
         if 'add_item' in request.POST:
             temp_form = TempTableForm(request.POST)
             if temp_form.is_valid():
@@ -130,7 +129,6 @@ def get_supplier_details(request, supplier_id):
     return JsonResponse({'supplier_name': supplier.name, 'supplier_contact': supplier.contact_number})
 
 #remove item from temp table
-from django.http import JsonResponse
 
 def remove_item(request, item_id):
     if request.method == 'POST':
@@ -152,7 +150,11 @@ def remove_item(request, item_id):
 
 
 
-#-------------------------------------------------------Sales view------------------------------------------------
+
+
+#-------------------------------------------------------Sales view-----------------------------------------------------
+
+
 
 
 
@@ -161,7 +163,6 @@ def sales_page(request):
     seller_id = request.session.get('seller_id', None)
     seller_name = request.session.get('seller_name', '')
     seller_contact = request.session.get('seller_contact', '')
-    # Retain the date in the session
     bill_date = request.session.get('bill_date', None)
 
     if seller_id:
@@ -174,7 +175,6 @@ def sales_page(request):
     temp_form = SalesTempForm()
 
     if request.method == 'POST':
-        # Add item to temp table
         if 'add_item' in request.POST:
             temp_form = SalesTempForm(request.POST)
             if temp_form.is_valid():
@@ -182,7 +182,6 @@ def sales_page(request):
                 temp_item.items_total = temp_item.item.price * temp_item.quantity
                 temp_item.save()
 
-                # Retain seller and bill date in the session
                 seller_id = request.POST.get('seller')
                 bill_date = request.POST.get('bill_date')
                 
@@ -190,13 +189,12 @@ def sales_page(request):
                 request.session['seller_id'] = seller_id
                 request.session['seller_name'] = seller.name
                 request.session['seller_contact'] = seller.contact_number
-                request.session['bill_date'] = bill_date  # Storing the date
+                request.session['bill_date'] = bill_date
 
                 return redirect('sales-create')
 
         # Finalize sales
         if 'finalize_sales' in request.POST:
-            # Check if temp table is empty before processing the sale
             if not temp_items.exists():
                 messages.error(request, "Add items to the sales list before finalizing.")
             else:
@@ -204,11 +202,10 @@ def sales_page(request):
                 if sales_form.is_valid():  # Validate only SalesMasterForm
                     with transaction.atomic():
                         sales_master = sales_form.save(commit=False)
-                        # Calculate subtotal
                         sales_master.sub_total = sum(item.items_total for item in temp_items)
                         sales_master.save()
 
-                        # Move items from SalesTempTable to SalesDetail
+
                         for temp_item in temp_items:
                             SalesDetail.objects.create(
                                 sales_master=sales_master,
@@ -230,7 +227,6 @@ def sales_page(request):
 
     sub_total = sum(item.items_total for item in temp_items)
 
-    # Generate new bill number
     last_bill = SalesMaster.objects.order_by('bill_number').last()
     if last_bill and last_bill.bill_number.startswith('BILL-'):
         last_bill_num = int(last_bill.bill_number.split('-')[1])
@@ -255,7 +251,6 @@ def sales_page(request):
 
 
 #remove item from temp table
-
 def remove_item_sales_temp(request, item_id):
     if request.method == 'POST':
         try:
@@ -293,18 +288,17 @@ def sales_detail_view(request, pk):
 def get_available_stock(request, item_id):
     
     if item_id:
-        # Total quantity purchased
         total_purchased = PurchaseDetail.objects.filter(item_id_id=item_id).aggregate(
             total=Sum('quantity')  # Use Sum to aggregate the quantity field
         )['total'] or 0
         
-        # Total quantity sold
         total_sold = SalesDetail.objects.filter(item_id=item_id).aggregate(
             total=Sum('quantity')  # Use Sum to aggregate the quantity field
         )['total'] or 0
         
-        # Available stock is purchased - sold
         available_stock = total_purchased - total_sold
+        if available_stock<0:
+            available_stock=0
 
         return JsonResponse({'available_stock': available_stock})
     
