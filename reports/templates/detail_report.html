@@ -3,44 +3,44 @@
 
 <h1 class="mb-3 text-3xl">Detailed List :</h1>
 
-<div class="container d-flex my-4 align-items-center">
-
-    <div class="d-flex">
-        <div class="mx-3">
-            <strong><label for="from_date">From Date:</label></strong>
-            <input id="from_date" type="date">
+<div class="container my-4">
+    <div class="row align-items-center">
+        <div class="col-md-8 d-flex">
+            <div class="mx-3">
+                <strong><label for="from_date">From Date:</label></strong>
+                <input id="from_date" type="date" onchange="filterData()" class="form-control">
+            </div>
+        
+            <div class="mx-3">
+                <strong><label for="to_date">To Date:</label></strong>
+                <input id="to_date" type="date" onchange="filterData()" class="form-control">
+            </div>
+            
+            <div class="mx-3">
+                <strong><label for="item">Item</label></strong>
+                <select id="item" onchange="filterData()" class="form-control">
+                    <option value="">All</option>
+                    {% for item in items %}
+                    <option value="{{ item.name }}">{{ item.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
-        <div class="mx-5">
-            <strong><label for="to_date">To Date:</label></strong>
-            <input id="to_date" type="date">
+        <div class="col-md-4">
+            <div class="mx-3" title='Change the type to apply the filter.'>
+                <strong><label for="report_type">Select Type</label></strong>
+                <select id="report_type" onchange="changeType(this.value)" class="form-control">
+                    <option value="purchase">Purchase</option>
+                    <option value="sales">Sales</option>
+                </select>
+            </div>
         </div>
-    </div>
-
-    <div class="mx-3">
-        <strong><label for="item">Item</label></strong>
-        <select id="item" onchange="filterData()">
-            <option value="">All</option>
-            {% for item in items %}
-            <option value="{{ item.name }}">{{ item.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <div class="dropdown mx-3">
-        <strong>Type</strong>
-        <button class="btn dropdown-toggle" type="button" id="reportsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-            Select Type
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
-            <li><a class="dropdown-item" href="#" onclick="changeType('purchase')">Purchase</a></li>
-            <li><a class="dropdown-item" href="#" onclick="changeType('sales')">Sales</a></li>
-        </ul>
     </div>
 </div>
 
 <!-- Detail Table -->
-<table class="table">
+<table class="table table-responsive">
     <thead>
         <tr>
             <th scope="col">S.No.</th>
@@ -52,28 +52,17 @@
         </tr>
     </thead>
     <tbody class="table-group-divider" id="stockTableBody">
-        <!-- Data to be filled via JavaScript or Django rendering -->
-        {% if stock_data %}
-        {% for stock in stock_data %}
+        <!-- Data to be filled via AJAX -->
         <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ stock.item_name }}</td>
-            <td>{{ stock.quantity }}</td>
-            <td>{{ stock.total }}</td>
-            <td>{{ stock.created_at }}</td>
-            <td>{{ stock.supplier_or_customer }}</td>
+            <td colspan="6">No Data Available</td>
         </tr>
-        {% endfor %}
-        {% else %}
-        <tr>
-            <td colspan="6">No Items Available</td>
-        </tr>
-        {% endif %}
     </tbody>
 </table>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 <script>
-    let selectedType = '';
+    let selectedType = 'purchase';
 
     function changeType(type) {
         selectedType = type;
@@ -85,9 +74,44 @@
         const toDate = document.getElementById('to_date').value;
         const item = document.getElementById('item').value;
 
-        // Redirect to the filtered page with parameters
-        window.location.href = `?type=${selectedType}&item=${item}&fromdate=${fromDate}&todate=${toDate}`;
+        // Manually build the URL with query parameters
+        const url = `/detail_report/?type=${encodeURIComponent(selectedType)}&item=${encodeURIComponent(item)}&fromdate=${encodeURIComponent(fromDate)}&todate=${encodeURIComponent(toDate)}`;
+    
+        // Perform AJAX request
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'  // Indicate it's an AJAX request
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById('stockTableBody');
+            tableBody.innerHTML = ''; // Clear previous table data
+    
+            if (data.stock_data && data.stock_data.length > 0) {
+                data.stock_data.forEach((stock, index) => {
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${stock.item_name}</td>
+                            <td>${stock.quantity}</td>
+                            <td>${stock.total}</td>
+                            <td>${stock.created_at}</td>
+                            <td>${stock.supplier_or_customer}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="6">No Items Available</td></tr>';
+            }
+        })
+        .catch(error => console.error('Error fetching data:', error));
     }
+
+    window.onload = function() {
+        filterData();  // Trigger the data load on initial page load
+    };
 </script>
 
 {% endblock %}

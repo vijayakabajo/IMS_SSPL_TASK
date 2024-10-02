@@ -5,6 +5,7 @@ from django.db.models import Sum
 from django.db.models import Q
 from django.utils.dateparse import parse_date
 from datetime import datetime
+from django.http import JsonResponse
 
 def report_page(request):
     items = Item.objects.filter(status=1)
@@ -37,32 +38,20 @@ def report_page(request):
     return render(request,'stock_report.html', context)
 
 
-def detail_report(request):
-
-
-
-
-    context = {
-
-    }
-    return render(request, 'detail_report.html', context)
-
-
-
 
 
 def detailed_list(request):
-
-    items = Item.objects.all()
+    items = Item.objects.filter(status=1)
+    
     # Get query params
     item_name = request.GET.get('item', '')
     from_date = request.GET.get('fromdate', '1900-01-01')  # Default to earliest date
-    to_date = request.GET.get('todate', datetime.now().date())  # Default to current date
+    to_date = request.GET.get('todate', str(datetime.now().date()))  # Default to current date
     report_type = request.GET.get('type', 'purchase')  # Default to purchase type
 
     # Convert string to date
-    from_date = parse_date(from_date)
-    to_date = parse_date(to_date)
+    from_date = parse_date(from_date) or datetime.strptime('1900-01-01', '%Y-%m-%d').date()
+    to_date = parse_date(to_date) or datetime.now().date()
 
     stock_data = []
 
@@ -75,34 +64,36 @@ def detailed_list(request):
 
         for purchase in purchases:
             stock_data.append({
-                'item_name': purchase.item_id.name,
+                'item_name': purchase.item_id.name,  # Updated for ForeignKey
                 'quantity': purchase.quantity,
                 'total': purchase.items_total,
                 'created_at': purchase.created_at,
-                'supplier_or_customer': purchase.purchase_master.supplier.name  # Assuming supplier is in purchase_master
+                'supplier_or_customer': purchase.purchase_master.supplier_id.name
             })
-    
+
     elif report_type == 'sales':
         # Fetch sales data
         sales = SalesDetail.objects.filter(created_at__date__range=[from_date, to_date])
 
         if item_name:
-            # Filtering by item name using the correct ForeignKey reference
-            sales = sales.filter(item__name__icontains=item_name)
+            sales = sales.filter(item_id__name__icontains=item_name)
 
         for sale in sales:
             stock_data.append({
-                'item_name': sale.item.name,  # Accessing the name of the item
+                'item_name': sale.item.name,
                 'quantity': sale.quantity,
                 'total': sale.items_total,
                 'created_at': sale.created_at,
-                'supplier_or_customer': sale.sales_master.customer.name  # Assuming customer is in sales_master
+                'supplier_or_customer': sale.sales_master.seller.name
             })
 
-    # Pass filtered stock data to template
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'stock_data': stock_data})
+
+    # Otherwise, render the template normally
     context = {
         'stock_data': stock_data,
         'items': items
     }
 
-    return render(request, 'reports/detailed_list.html', context)
+    return render(request, 'detail_report.html', context)
