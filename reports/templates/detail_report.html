@@ -48,7 +48,8 @@
             <th scope="col">Quantity</th>
             <th scope="col">Total</th>
             <th scope="col">Date</th>
-            <th scope="col">Supplier/Customer</th>
+            <th scope="col" id="supplier_customer_header">Supplier</th>
+
         </tr>
     </thead>
     <tbody class="table-group-divider" id="stockTableBody">
@@ -66,6 +67,8 @@
 
     function changeType(type) {
         selectedType = type;
+        const header = document.getElementById('supplier_customer_header');
+        header.textContent = type === 'purchase' ? 'Supplier' : 'Customer';
         filterData();
     }
 
@@ -74,10 +77,8 @@
         const toDate = document.getElementById('to_date').value;
         const item = document.getElementById('item').value;
 
-        // Manually build the URL with query parameters
         const url = `/detail_report/?type=${encodeURIComponent(selectedType)}&item=${encodeURIComponent(item)}&fromdate=${encodeURIComponent(fromDate)}&todate=${encodeURIComponent(toDate)}`;
     
-        // Perform AJAX request
         fetch(url, {
             method: 'GET',
             headers: {
@@ -110,7 +111,7 @@
     }
 
     window.onload = function() {
-        filterData();  // Trigger the data load on initial page load
+        filterData();
     };
 </script>
 

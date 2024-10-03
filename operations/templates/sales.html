@@ -16,14 +16,14 @@
         <br>
         
         <!-- Seller (Supplier) form fields -->
-        <strong><label class='mt-2'>Seller:</label></strong>
+        <strong><label class='mt-2'>Customer:</label></strong>
         {{ sales_form.seller }}
         {{ sales_form.seller.errors }}
    
         <!-- Seller details will be displayed here -->
         <div id="seller-details" class="mt-2">
             {% if seller_name and seller_contact %}
-                <strong>Seller Name:</strong> {{ seller_name }}<br>
+                <strong>Customer Name:</strong> {{ seller_name }}<br>
                 <strong>Contact Number:</strong> {{ seller_contact }}
             {% endif %}
         </div>

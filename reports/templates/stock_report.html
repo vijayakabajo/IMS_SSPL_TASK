@@ -82,19 +82,20 @@
     function searchItem() {
         const searchInput = document.getElementById('searchInput').value.toLowerCase();
         const tableRows = document.querySelectorAll('#stockTableBody tr');
-
-        if(searchInput!==""){
-            tableRows.forEach(row => {
-                const itemCell = row.children[1].textContent.toLowerCase();
-                if (itemCell.includes(searchInput)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-        
+    
+        tableRows.forEach(row => {
+            const itemCell = row.children[1].textContent.toLowerCase();
+            
+            // Show all rows if the search input is empty
+            if (searchInput === "") {
+                row.style.display = '';
+            } else {
+                // Otherwise, check if the item matches the search input
+                row.style.display = itemCell.includes(searchInput) ? '' : 'none';
+            }
+        });
     }
+    
 </script>
 
 {% endblock %}
