@@ -40,6 +40,7 @@ def report_page(request):
 
 
 
+
 def detailed_list(request):
     items = Item.objects.filter(status=1)
     
