@@ -77,6 +77,10 @@ class SalesTempForm(forms.ModelForm):
         return item
 
     def clean_quantity(self):
+        # Check if there are already errors in the 'item' field, skip further validation
+        if self.errors.get('item'):
+            return self.cleaned_data.get('quantity')
+
         quantity = self.cleaned_data.get('quantity')
         item = self.cleaned_data.get('item')
 
@@ -90,8 +94,8 @@ class SalesTempForm(forms.ModelForm):
 
         # Validate that the quantity does not exceed available stock
         if quantity > available_stock:
-
-            raise ValidationError(f"The quantity cannot exceed the available stock")
+            raise ValidationError(f"The quantity cannot exceed the available stock.")
 
         return quantity
+
 
