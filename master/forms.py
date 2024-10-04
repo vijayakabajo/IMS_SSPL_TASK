@@ -4,7 +4,7 @@ from .models import Supplier, Item
 class SupplierForm(forms.ModelForm):
     class Meta:
         model = Supplier
-        fields = ['name', 'contact_number']
+        fields = ['name', 'contact_number', 'address']
 
 class ItemForm(forms.ModelForm):
     class Meta:

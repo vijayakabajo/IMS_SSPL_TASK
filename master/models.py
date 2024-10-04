@@ -4,6 +4,7 @@ from django.core.validators import RegexValidator
 
 class Supplier(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
+    address = models.CharField(max_length=500, blank= False, null= False)
     contact_number = models.CharField(
         max_length=10,
         blank=False, null=False, unique=True,

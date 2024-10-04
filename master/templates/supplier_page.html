@@ -13,9 +13,11 @@
             <tr>
                 <th>Sl No.</th>
                 <th>Name</th>
+                <th>Address</th>
                 <th>Contact Number</th>
                 <th>Edit</th>
                 <th>Delete</th>
+                <th>View</th>
             </tr>
         </thead>
         <tbody>
@@ -24,17 +26,19 @@
                 <tr>
                     <td scope="row">{{ forloop.counter }}</td>
                     <td>{{ supplier.name }}</td>
+                    <td>{{ supplier.address }}</td>
                     <td>{{ supplier.contact_number }}</td>
                     <td>
+
                         <a href="{% url 'handle_supplier' 'edit' supplier.id %}" class="btn btn-primary btn-sm">Edit</a>
                     </td>
                     <td>
-                        <!-- Trigger modal -->
+                        <!-- Trigger delete modal -->
                         <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ supplier.id }}">
                             Delete
                         </button>
 
-                        <!-- Modal -->
+                        <!-- Delete Modal -->
                         <div class="modal fade" id="deleteModal{{ supplier.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ supplier.id }}" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -56,12 +60,37 @@
                             </div>
                         </div>
                     </td>
+                    <td>
+                        <!-- View button -->
+                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewModal{{ supplier.id }}">
+                            View
+                        </button>
+
+                        <!-- View Modal -->
+                        <div class="modal fade" id="viewModal{{ supplier.id }}" tabindex="-1" aria-labelledby="viewModalLabel{{ supplier.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h6 class="modal-title" id="viewModalLabel{{ supplier.id }}"><strong>Supplier Details: </strong>{{ supplier.name }}</h6>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p><strong>Name:</strong> {{ supplier.name }}</p>
+                                        <p><strong>Address:</strong> {{ supplier.address }}</p>
+                                        <p><strong>Contact Number:</strong> {{ supplier.contact_number }}</p>
+                                        <!-- Add more fields as necessary -->
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
                 {% endif %}
             {% endfor %}
         </tbody>
     </table>
-
-
 </body>
 {% endblock %}
