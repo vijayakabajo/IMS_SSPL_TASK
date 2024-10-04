@@ -6,36 +6,39 @@ from django.db.models import Q
 from django.utils.dateparse import parse_date
 from datetime import datetime
 from django.http import JsonResponse
+from django.db import connection
+
+from django.db import connection
 
 def report_page(request):
-    items = Item.objects.filter(status=1)
-    stock_data = []
-    for item in items:
-        #quantity purchased
-        total_purchased = PurchaseDetail.objects.filter(item_id=item.id).aggregate(
-            total_purchased=Sum('quantity')
-        )['total_purchased'] or 0
-        
-        
-        #quantity sold
-        total_sold = SalesDetail.objects.filter(item_id=item.id).aggregate(
-            total_sold=Sum('quantity')
-        )['total_sold'] or 0
-        
-        # Available stock
-        available_stock = total_purchased - total_sold
-
-        stock_data.append({
-            'item_name': item.name,
-            'total_purchased': total_purchased,
-            'total_sold': total_sold,
-            'available_stock': available_stock
-        })
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT i.id, i.name,
+                COALESCE(SUM(p.quantity), 0) AS total_purchased,
+                COALESCE(SUM(s.quantity), 0) AS total_sold,
+                COALESCE(SUM(p.quantity), 0) - COALESCE(SUM(s.quantity), 0) AS available_stock
+            FROM master_item i
+            LEFT JOIN operations_purchasedetail p ON p.item_id_id = i.id
+            LEFT JOIN operations_salesdetail s ON s.item_id = i.id
+            WHERE i.status = 1
+            GROUP BY i.id, i.name;
+        """)
+        stock_data = cursor.fetchall()
 
     context = {
-        'stock_data': stock_data,
+        'stock_data': [
+            {
+                'item_name': row[1],
+                'total_purchased': row[2],
+                'total_sold': row[3],
+                'available_stock': row[4]
+            }
+            for row in stock_data
+        ]
     }
-    return render(request,'stock_report.html', context)
+
+    return render(request, 'stock_report.html', context)
+
 
 
 

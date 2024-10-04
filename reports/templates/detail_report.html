@@ -1,118 +1,136 @@
-{% extends "layout.html" %}
-{% block content %}
+{% extends "layout.html" %} {% block content %}
 
 <h1 class="mb-3 text-3xl">Detailed List :</h1>
 
 <div class="container my-4">
-    <div class="row align-items-center">
-        <div class="col-md-8 d-flex">
-            <div class="mx-3">
-                <strong><label for="from_date">From Date:</label></strong>
-                <input id="from_date" type="date" onchange="filterData()" class="form-control">
-            </div>
-        
-            <div class="mx-3">
-                <strong><label for="to_date">To Date:</label></strong>
-                <input id="to_date" type="date" onchange="filterData()" class="form-control">
-            </div>
-            
-            <div class="mx-3">
-                <strong><label for="item">Item</label></strong>
-                <select id="item" onchange="filterData()" class="form-control">
-                    <option value="">All</option>
-                    {% for item in items %}
-                    <option value="{{ item.name }}">{{ item.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
+  <div class="row align-items-center">
+    <div class="col-md-8 d-flex">
+      <div class="mx-3">
+        <strong><label for="from_date">From Date:</label></strong>
+        <input
+          id="from_date"
+          type="date"
+          onchange="filterData()"
+          class="form-control"
+        />
+      </div>
 
-        <div class="col-md-4">
-            <div class="mx-3" title='Change the type to apply the filter.'>
-                <strong><label for="report_type">Select Type</label></strong>
-                <select id="report_type" onchange="changeType(this.value)" class="form-control">
-                    <option value="purchase">Purchase</option>
-                    <option value="sales">Sales</option>
-                </select>
-            </div>
-        </div>
+      <div class="mx-3">
+        <strong><label for="to_date">To Date:</label></strong>
+        <input
+          id="to_date"
+          type="date"
+          onchange="filterData()"
+          class="form-control"
+        />
+      </div>
+
+      <div class="mx-3">
+        <strong><label for="item">Item</label></strong>
+        <select id="item" onchange="filterData()" class="form-control">
+          <option value="">All</option>
+          {% for item in items %}
+          <option value="{{ item.name }}">{{ item.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
+
+    <div class="col-md-4">
+      <div class="mx-3" title="Change the type to apply the filter.">
+        <strong><label for="report_type">Select Type</label></strong>
+        <select
+          id="report_type"
+          onchange="changeType(this.value)"
+          class="form-control"
+        >
+          <option value="Select Type">---Select Type---</option>
+          <option value="purchase">Purchase</option>
+          <option value="sales">Sales</option>
+        </select>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- Detail Table -->
 <table class="table table-responsive">
-    <thead>
-        <tr>
-            <th scope="col">S.No.</th>
-            <th scope="col">Item Name</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Total</th>
-            <th scope="col">Date</th>
-            <th scope="col" id="supplier_customer_header">Supplier</th>
-
-        </tr>
-    </thead>
-    <tbody class="table-group-divider" id="stockTableBody">
-        <!-- Data to be filled via AJAX -->
-        <tr>
-            <td colspan="6">No Data Available</td>
-        </tr>
-    </tbody>
+  <thead>
+    <tr>
+      <th scope="col">S.No.</th>
+      <th scope="col">Item Name</th>
+      <th scope="col">Quantity</th>
+      <th scope="col">Total</th>
+      <th scope="col">Date</th>
+      <th scope="col" id="supplier_customer_header">Supplier</th>
+    </tr>
+  </thead>
+  <tbody class="table-group-divider" id="stockTableBody">
+    <tr>
+      <td colspan="6">No Data Available</td>
+    </tr>
+  </tbody>
 </table>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <script>
-    let selectedType = 'purchase';
+  let selectedType = '';
 
-    function changeType(type) {
-        selectedType = type;
-        const header = document.getElementById('supplier_customer_header');
-        header.textContent = type === 'purchase' ? 'Supplier' : 'Customer';
-        filterData();
-    }
+  function changeType(type) {
+      selectedType = type;
+      const header = document.getElementById('supplier_customer_header');
+      header.textContent = type === 'purchase' ? 'Supplier' : 'Customer';
+      filterData();
+  }
 
-    function filterData() {
-        const fromDate = document.getElementById('from_date').value;
-        const toDate = document.getElementById('to_date').value;
-        const item = document.getElementById('item').value;
+  function filterData() {
+      const fromDate = document.getElementById('from_date').value;
+      const toDate = document.getElementById('to_date').value;
+      const item = document.getElementById('item').value;
 
-        const url = `/detail_report/?type=${encodeURIComponent(selectedType)}&item=${encodeURIComponent(item)}&fromdate=${encodeURIComponent(fromDate)}&todate=${encodeURIComponent(toDate)}`;
-    
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'  // Indicate it's an AJAX request
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.getElementById('stockTableBody');
-            tableBody.innerHTML = ''; // Clear previous table data
-    
-            if (data.stock_data && data.stock_data.length > 0) {
-                data.stock_data.forEach((stock, index) => {
-                    tableBody.innerHTML += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${stock.item_name}</td>
-                            <td>${stock.quantity}</td>
-                            <td>${stock.total}</td>
-                            <td>${stock.created_at}</td>
-                            <td>${stock.supplier_or_customer}</td>
-                        </tr>
-                    `;
-                });
-            } else {
-                tableBody.innerHTML = '<tr><td colspan="6">No Items Available</td></tr>';
-            }
-        })
-        .catch(error => console.error('Error fetching data:', error));
-    }
+      const url = `/detail_report/?type=${encodeURIComponent(selectedType)}&item=${encodeURIComponent(item)}&fromdate=${encodeURIComponent(fromDate)}&todate=${encodeURIComponent(toDate)}`;
 
-    window.onload = function() {
-        filterData();
-    };
+      fetch(url, {
+          method: 'GET',
+          headers: {
+              'X-Requested-With': 'XMLHttpRequest'  // Indicate it's an AJAX request
+          }
+      })
+      .then(response => response.json())
+      .then(data => {
+          const tableBody = document.getElementById('stockTableBody');
+          tableBody.innerHTML = ''; // Clear previous table data
+
+          if (data.stock_data && data.stock_data.length > 0) {
+              data.stock_data.forEach((stock, index) => {
+                  tableBody.innerHTML += `
+                      <tr>
+                          <td>${index + 1}</td>
+                          <td>${stock.item_name}</td>
+                          <td>${stock.quantity}</td>
+                          <td>${stock.total}</td>
+                          <td>${stock.created_at}</td>
+                          <td>${stock.supplier_or_customer}</td>
+                      </tr>
+                  `;
+              });
+          } else {
+              tableBody.innerHTML = '<tr><td colspan="6">No Items Available</td></tr>';
+          }
+      })
+      .catch(error => console.error('Error fetching data:', error));
+  }
+
+  function setDefaultDates() {
+      const today = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+      document.getElementById('from_date').value = today; // Set from date to today
+      document.getElementById('to_date').value = today; // Set to date to today
+  }
+
+  window.onload = function() {
+      {% comment %} filterData(); {% endcomment %}
+      setDefaultDates();
+  };
 </script>
 
 {% endblock %}
