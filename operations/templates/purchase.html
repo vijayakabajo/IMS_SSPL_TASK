@@ -88,14 +88,12 @@
         </div>
 
         <!-- Finalize Purchase Button at the Bottom -->
-         <div class='flex justify-between mt-4 mx-2'>
+         <div class='flex justify-end mt-4 mx-2'>
                 <button class="btn btn-primary" type="submit" name="finalize_purchase" id="finalizePurchaseBtn">Finalize Purchase</button>
-                <a href="{% url 'purchase_master_list' %}" class='btn btn-info'><< Purchase List</a>
+                {% comment %} <a href="{% url 'purchase_master_list' %}" class='btn btn-info'><< Purchase List</a> {% endcomment %}
          </div>
 
     </form>
-
-    
 
 </div>
 

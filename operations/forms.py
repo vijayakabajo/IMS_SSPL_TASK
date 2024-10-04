@@ -21,6 +21,13 @@ class TempTableForm(forms.ModelForm):
         model = TempTable
         fields = ['item_id', 'quantity']
 
+        widgets = {
+            'quantity': forms.NumberInput(attrs={
+                'min': '0',
+                'step': '1.0' 
+            }),
+        }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['item_id'].queryset = Item.objects.filter(status=1)
@@ -38,6 +45,7 @@ class TempTableForm(forms.ModelForm):
         if quantity <= 0:
             raise forms.ValidationError("Quantity must be greater than 0.")
         return quantity
+    
 
 
 # ------------------------------------------------Sales forrm------------------------------------------------
@@ -63,6 +71,13 @@ class SalesTempForm(forms.ModelForm):
     class Meta:
         model = SalesTempTable
         fields = ['item', 'quantity']
+
+        widgets = {
+            'quantity': forms.NumberInput(attrs={
+                'min': '0',
+                'step': '1.0' 
+            }),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

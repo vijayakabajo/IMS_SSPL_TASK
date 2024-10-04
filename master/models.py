@@ -7,7 +7,7 @@ class Supplier(models.Model):
     contact_number = models.CharField(
         max_length=10,
         blank=False, null=False, unique=True,
-        validators=[RegexValidator(r'^\d{10}$', 'Enter a 10-digit mobile number')]#Note:Unique: True (will add later)
+        validators=[RegexValidator(r'^\d{10}$', 'Enter a 10-digit mobile number')]
     )
     status = models.SmallIntegerField(default=1, null=False)               #pseudo delete
 

@@ -11,6 +11,13 @@ class ItemForm(forms.ModelForm):
         model = Item
         fields = ['name', 'price', 'image']
 
+        widgets = {
+            'price': forms.NumberInput(attrs={
+                'min': '0',  # Set the minimum value to 0
+                'step': '100.0'  # Optional: allows decimal values
+            }),
+        }
+
 
         #validatin
     def clean_price(self):
