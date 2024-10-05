@@ -13,8 +13,8 @@ class ItemForm(forms.ModelForm):
 
         widgets = {
             'price': forms.NumberInput(attrs={
-                'min': '0',  # Set the minimum value to 0
-                'step': '100.0'  # Optional: allows decimal values
+                'min': '0',
+                'step': '.01'
             }),
         }
 

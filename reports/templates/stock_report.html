@@ -3,114 +3,105 @@
 
 <h1 class="mb-3 text-3xl">Item Stock List :</h1>
 
-<!-- Filters for date range and item selection -->
-<div class="flex justify-between items-center mx-2 mb-4">
+<form id="filterForm" method="GET" action="{% url 'report_page' %}">
+  <div class="flex justify-between items-center mx-2 mb-4">
     <div>
-        <strong><label class='mb-1' for="item">Select Item:</label></strong>
-        <select class='form-control' id="item" onclick="filterData()">
-            <option value="">All</option>
-            {% for stock in stock_data %}
-            <option value="{{ stock.item_name }}">{{ stock.item_name }}</option>
-            {% endfor %}
-        </select>
+      <strong><label class="mb-1" for="item">Select Item:</label></strong>
+      <select class="form-control" id="item" name="item">
+        <option value="">All</option>
+        {% for stock in stock_data %}
+        <option value="{{ stock.1 }}" {% if request.GET.item == stock.1 %}selected{% endif %}>{{ stock.1 }}</option>
+        {% endfor %}
+      </select>
     </div>
-
-    {% comment %} <div class="">
-        <form role="search" onsubmit="event.preventDefault(); searchItem();">
-            <input class="form-control" id="searchInput" type="search" placeholder="Search by Item Name" aria-label="Search">
-        </form>
-    </div> {% endcomment %}
 
     <div class="">
-        <input class="form-control" id="searchInput" type="text" placeholder="Search by Item Name" aria-label="Search" oninput="searchItem()">
+      <input
+        class="form-control"
+        id="searchInput"
+        name="search_input"
+        type="text"
+        placeholder="Search by Item Name"
+        value="{{ request.GET.search_input }}"
+      />
     </div>
-
-</div>
-
-
+  </div>
+</form>
 
 
 
 
-<!-- Stock Table -->
 <table class="table">
-    <thead class="">
-        <tr>
-            <th scope="col">S.No.</th>
-            <th scope="col">Item Name</th>
-            <th scope="col">Total Purchased</th>
-            <th scope="col">Total Sold</th>
-            <th scope="col">Available Stock</th>
-        </tr>
-    </thead>
-    <tbody class="table-group-divider" id="stockTableBody">
-        {% for stock in stock_data %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ stock.item_name }}</td>
-            <td>{{ stock.total_purchased }}</td>
-            <td>{{ stock.total_sold }}</td>
-            <td>{{ stock.available_stock }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="6">No Items Available</td>
-        </tr>
-        {% endfor %}
-    </tbody>
+  <thead class="">
+    <tr>
+      <th scope="col">S.No.</th>
+      <th scope="col">Item Name</th>
+      <th scope="col">Total Purchased</th>
+      <th scope="col">Total Sold</th>
+      <th scope="col">Available Stock</th>
+    </tr>
+  </thead>
+  <tbody class="table-group-divider" id="stockTableBody">
+    {% for stock in stock_data %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ stock.1 }}</td>
+      <td>{{ stock.2 }}</td>
+      <td>{{ stock.3 }}</td>
+      <td>{{ stock.4 }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="5">No Items Available</td>
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>
 
+
+
+
+<!-- -------------------------------script---------------------------------------- -->
 <script>
-    function updateSerialNumbers() {
-        const tableRows = document.querySelectorAll('#stockTableBody tr');
-        let visibleCount = 0; // To track visible rows for serial numbering
-        
-        tableRows.forEach(row => {
-            // Only update serial number for visible rows
-            if (row.style.display !== 'none') {
-                visibleCount++;
-                row.cells[0].textContent = visibleCount; // Update S.No.
-            }
-        });
-    }
 
-    function filterData() {
-        const itemName = document.getElementById('item').value;
-        const tableRows = document.querySelectorAll('#stockTableBody tr');
-        
-        tableRows.forEach(row => {
-            const itemCell = row.children[1].textContent.trim();
-            
-            // Check if item matches or is "All"
-            if (itemName === '' || itemCell === itemName) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-        
-        updateSerialNumbers(); // Update serial numbers after filtering
-    }
 
-    function searchItem() {
-        const searchInput = document.getElementById('searchInput').value.toLowerCase();
-        const tableRows = document.querySelectorAll('#stockTableBody tr');
-    
-        tableRows.forEach(row => {
-            const itemCell = row.children[1].textContent.toLowerCase();
-            
-            // Show all rows if the search input is empty
-            if (searchInput === "") {
-                row.style.display = '';
-            } else {
-                // Otherwise, check if the item matches the search input
-                row.style.display = itemCell.includes(searchInput) ? '' : 'none';
-            }
-        });
-        
-        updateSerialNumbers(); // Update serial numbers after searching
-    }
+  function submitForm() {
+    const form = document.getElementById('filterForm');
+    const formData = new FormData(form);
+    const searchParams = new URLSearchParams(formData).toString();
+
+
+    fetch("{% url 'report_page' %}?" + searchParams, {
+      method: 'GET',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      updateTable(data.stock_data);
+    });
+  }
+
+  function updateTable(stockData) {
+    const tableBody = document.getElementById('stockTableBody');
+    tableBody.innerHTML = '';
+
+    stockData.forEach((stock, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${stock[1]}</td>
+        <td>${stock[2]}</td>
+        <td>${stock[3]}</td>
+        <td>${stock[4]}</td>
+      `;
+      tableBody.appendChild(row);
+    });
+  }
+
+  document.getElementById('item').addEventListener('change', submitForm);
+  document.getElementById('searchInput').addEventListener('input', submitForm);
 </script>
-
 
 {% endblock %}

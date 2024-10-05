@@ -84,42 +84,44 @@
   }
 
   function filterData() {
-      const fromDate = document.getElementById('from_date').value;
-      const toDate = document.getElementById('to_date').value;
-      const item = document.getElementById('item').value;
+    const fromDate = document.getElementById('from_date').value;
+    const toDate = document.getElementById('to_date').value;
+    const item = document.getElementById('item').value;
+    const reportType = selectedType || 'purchase';  // Make sure 'selectedType' is set correctly
 
-      const url = `/detail_report/?type=${encodeURIComponent(selectedType)}&item=${encodeURIComponent(item)}&fromdate=${encodeURIComponent(fromDate)}&todate=${encodeURIComponent(toDate)}`;
+    const url = `/detail_report/?type=${encodeURIComponent(reportType)}&item=${encodeURIComponent(item)}&fromdate=${encodeURIComponent(fromDate)}&todate=${encodeURIComponent(toDate)}`;
 
-      fetch(url, {
-          method: 'GET',
-          headers: {
-              'X-Requested-With': 'XMLHttpRequest'  // Indicate it's an AJAX request
-          }
-      })
-      .then(response => response.json())
-      .then(data => {
-          const tableBody = document.getElementById('stockTableBody');
-          tableBody.innerHTML = ''; // Clear previous table data
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'  // Indicate it's an AJAX request
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const tableBody = document.getElementById('stockTableBody');
+        tableBody.innerHTML = ''; // Clear previous table data
 
-          if (data.stock_data && data.stock_data.length > 0) {
-              data.stock_data.forEach((stock, index) => {
-                  tableBody.innerHTML += `
-                      <tr>
-                          <td>${index + 1}</td>
-                          <td>${stock.item_name}</td>
-                          <td>${stock.quantity}</td>
-                          <td>${stock.total}</td>
-                          <td>${stock.created_at}</td>
-                          <td>${stock.supplier_or_customer}</td>
-                      </tr>
-                  `;
-              });
-          } else {
-              tableBody.innerHTML = '<tr><td colspan="6">No Items Available</td></tr>';
-          }
-      })
-      .catch(error => console.error('Error fetching data:', error));
-  }
+        if (data.stock_data && data.stock_data.length > 0) {
+            data.stock_data.forEach((stock, index) => {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${stock.item_name}</td>
+                        <td>${stock.quantity}</td>
+                        <td>${stock.total}</td>
+                        <td>${stock.created_at}</td>
+                        <td>${stock.supplier_or_customer}</td>
+                    </tr>
+                `;
+            });
+        } else {
+            tableBody.innerHTML = '<tr><td colspan="6">No Items Available</td></tr>';
+        }
+    })
+    .catch(error => console.error('Error fetching data:', error));
+}
+
 
   function setDefaultDates() {
       const today = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
