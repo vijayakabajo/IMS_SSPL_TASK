@@ -55,8 +55,7 @@ from django.db import connection
 
 def detailed_list(request):
     items = Item.objects.filter(status=1)
-    
-    # Get query params
+
     item_name = request.GET.get('item', '')
     from_date = request.GET.get('fromdate', '1900-01-01')
     to_date = request.GET.get('todate', str(datetime.now().date())) 
@@ -66,6 +65,7 @@ def detailed_list(request):
     to_date = parse_date(to_date) or datetime.now().date()
 
     stock_data = []
+
     query = ''
     params = []
 
@@ -76,7 +76,7 @@ def detailed_list(request):
             JOIN master_item i ON pd.item_id_id = i.id
             JOIN operations_purchasemaster pm ON pd.purchase_master_id = pm.id
             JOIN master_supplier s ON pm.supplier_id_id = s.id
-            WHERE pd.created_at BETWEEN %s AND %s
+            WHERE pd.created_at BETWEEN %s AND %s 
         '''
         params = [from_date, to_date]
 

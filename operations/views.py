@@ -12,7 +12,22 @@ from django.db.models import Sum
 
 #-----------------------------------------------------purchase page--------------------------------------------------------
 
+#Purchase Master Page
+def purchase_master_list(request):
+    purchases = PurchaseMaster.objects.all().order_by('-created_at')
+    return render(request, 'purchase_master_list.html', {'purchases': purchases})
 
+#Purchase Detail Page
+def purchase_detail_view(request, pk):
+    # Fetch the specific PurchaseMaster by its primary key
+    purchase_master = get_object_or_404(PurchaseMaster, pk=pk)
+    # Fetch all PurchaseDetails associated with the PurchaseMaster
+    purchase_details = PurchaseDetail.objects.filter(purchase_master=purchase_master)
+    return render(request, 'purchase_detail_view.html', {'purchase_master': purchase_master, 'purchase_details': purchase_details})
+
+
+
+#New Purchase
 def purchase_page(request):
     supplier_id = request.session.get('supplier_id', None)
     supplier_name = request.session.get('supplier_name', '')
@@ -105,19 +120,6 @@ def purchase_page(request):
 
 
 
-#Purchase Master Page
-def purchase_master_list(request):
-    purchases = PurchaseMaster.objects.all().order_by('-created_at')
-    return render(request, 'purchase_master_list.html', {'purchases': purchases})
-
-#Purchase Detail Page
-def purchase_detail_view(request, pk):
-    # Fetch the specific PurchaseMaster by its primary key
-    purchase_master = get_object_or_404(PurchaseMaster, pk=pk)
-    # Fetch all PurchaseDetails associated with the PurchaseMaster
-    purchase_details = PurchaseDetail.objects.filter(purchase_master=purchase_master)
-    return render(request, 'purchase_detail_view.html', {'purchase_master': purchase_master, 'purchase_details': purchase_details})
-
 # item price
 def get_item_price(request, item_id):
     item = get_object_or_404(Item, id=item_id)
@@ -129,7 +131,6 @@ def get_supplier_details(request, supplier_id):
     return JsonResponse({'supplier_name': supplier.name, 'supplier_contact': supplier.contact_number})
 
 #remove item from temp table
-
 def remove_item(request, item_id):
     if request.method == 'POST':
         try:

@@ -87,20 +87,20 @@
     const fromDate = document.getElementById('from_date').value;
     const toDate = document.getElementById('to_date').value;
     const item = document.getElementById('item').value;
-    const reportType = selectedType || 'purchase';  // Make sure 'selectedType' is set correctly
+    const reportType = selectedType || 'purchase'; 
 
     const url = `/detail_report/?type=${encodeURIComponent(reportType)}&item=${encodeURIComponent(item)}&fromdate=${encodeURIComponent(fromDate)}&todate=${encodeURIComponent(toDate)}`;
 
     fetch(url, {
         method: 'GET',
         headers: {
-            'X-Requested-With': 'XMLHttpRequest'  // Indicate it's an AJAX request
+            'X-Requested-With': 'XMLHttpRequest'
         }
     })
     .then(response => response.json())
     .then(data => {
         const tableBody = document.getElementById('stockTableBody');
-        tableBody.innerHTML = ''; // Clear previous table data
+        tableBody.innerHTML = '';
 
         if (data.stock_data && data.stock_data.length > 0) {
             data.stock_data.forEach((stock, index) => {
@@ -124,9 +124,9 @@
 
 
   function setDefaultDates() {
-      const today = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
-      document.getElementById('from_date').value = today; // Set from date to today
-      document.getElementById('to_date').value = today; // Set to date to today
+      const today = new Date().toISOString().split('T')[0]; 
+      document.getElementById('from_date').value = today; 
+      document.getElementById('to_date').value = today;
   }
 
   window.onload = function() {
