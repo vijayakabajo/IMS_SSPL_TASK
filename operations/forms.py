@@ -34,11 +34,6 @@ class TempTableForm(forms.ModelForm):
         self.fields['item_id'].label = "Item"
         self.fields['quantity'].label = "Quantity"
 
-    def clean_item_id(self):
-        item_id = self.cleaned_data.get('item_id')
-        if TempTable.objects.filter(item_id=item_id).exists():
-            raise forms.ValidationError("Item already exists in the List.")
-        return item_id
     
     def clean_quantity(self):
         quantity = self.cleaned_data.get('quantity')

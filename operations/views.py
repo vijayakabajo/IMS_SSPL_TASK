@@ -6,7 +6,7 @@ from .forms import TempTableForm, PurchaseMasterForm, SalesMasterForm , SalesTem
 from django.http import JsonResponse
 from django.contrib import messages
 from django.db.models import Sum
-
+from django.template.loader import render_to_string
 
 
 
@@ -27,74 +27,79 @@ def purchase_detail_view(request, pk):
 
 
 
-#New Purchase
+
+
+
+# New Purchase
+@transaction.atomic
 def purchase_page(request):
-    supplier_id = request.session.get('supplier_id', None)
-    supplier_name = request.session.get('supplier_name', '')
-    supplier_contact = request.session.get('supplier_contact', '')
-
-    if supplier_id:
-        initial_data = {'supplier_id': supplier_id}
-    else:
-        initial_data = {}
-
-    temp_items = TempTable.objects.all().order_by('-created_at')  # Fetch temp table data
-    purchase_form = PurchaseMasterForm(initial=initial_data)
+    temp_items = TempTable.objects.all().order_by('-created_at')
     temp_form = TempTableForm()
+    purchase_form = PurchaseMasterForm()
 
     if request.method == 'POST':
-        if 'add_item' in request.POST:
+        # Handle AJAX request for adding items to temp table
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             temp_form = TempTableForm(request.POST)
+            supplier_id = request.POST.get('supplier_id')
+
             if temp_form.is_valid():
-                temp_item = temp_form.save(commit=False)
-                temp_item.items_total = temp_item.item_id.price * temp_item.quantity
+                item_id = temp_form.cleaned_data['item_id']
+                quantity = temp_form.cleaned_data['quantity']
+                item_price = temp_form.cleaned_data['item_id'].price
+                items_total = item_price * quantity
+
+                temp_item, created = TempTable.objects.get_or_create(
+                    item_id=item_id,
+                    defaults={'quantity': quantity, 'items_total': items_total}
+                )
+                if not created:
+                    temp_item.quantity += quantity
+                    temp_item.items_total += items_total
                 temp_item.save()
 
-                # Retain supplier selection and store details in the session
-                supplier_id = request.POST.get('supplier_id')
-                supplier = Supplier.objects.get(id=supplier_id)
-                request.session['supplier_id'] = supplier_id
-                request.session['supplier_name'] = supplier.name
-                request.session['supplier_contact'] = supplier.contact_number
+                temp_items = TempTable.objects.all().order_by('-created_at')
+                sub_total = sum(item.items_total for item in temp_items)
 
-                return redirect('purchase-page')
+                return JsonResponse({
+                    'item': {
+                        'id': temp_item.id,
+                        'name': temp_item.item_id.name,
+                        'quantity': temp_item.quantity,
+                        'items_total': temp_item.items_total
+                    },
+                    'sub_total': sub_total
+                })
 
-        # Finalize purchase
-        if 'finalize_purchase' in request.POST:
-            # Check if temp table is empty before processing the purchase
-            if not temp_items.exists():
-                messages.error(request, "Add items to the purchase list before finalizing.")
+        # Handle finalizing the purchase
+        elif 'finalize_purchase' in request.POST:
+            if temp_items.exists():
+                supplier = get_object_or_404(Supplier, id=request.POST.get('supplier_id'))
+                invoice_number = request.POST.get('invoice_number')
+                sub_total = sum(item.items_total for item in temp_items)
+
+                purchase_master = PurchaseMaster.objects.create(
+                    supplier_id=supplier,
+                    invoice_number=invoice_number,
+                    sub_total=sub_total
+                )
+
+                for temp_item in temp_items:
+                    PurchaseDetail.objects.create(
+                        purchase_master=purchase_master,
+                        item_id=temp_item.item_id,
+                        quantity=temp_item.quantity,
+                        items_total=temp_item.items_total
+                    )
+
+                # Clear temp items after purchase is finalized
+                temp_items.delete()
+                return redirect('purchase_master_list')
+
             else:
-                purchase_form = PurchaseMasterForm(request.POST)
-                if purchase_form.is_valid():  # Validate only PurchaseMasterForm
-                    with transaction.atomic():
-                        purchase_master = purchase_form.save(commit=False)
-                        # Calculate subtotal
-                        purchase_master.sub_total = sum(item.items_total for item in temp_items)
-                        purchase_master.save()
+                messages.error(request, "No items to finalize.")
 
-                        # Move items from TempTable to PurchaseDetail
-                        for temp_item in temp_items:
-                            PurchaseDetail.objects.create(
-                                purchase_master=purchase_master,
-                                item_id=temp_item.item_id,
-                                quantity=temp_item.quantity,
-                                items_total=temp_item.items_total
-                            )
-
-                        # Clear the TempTable after purchase
-                        TempTable.objects.all().delete()
-
-                        # Clear the supplier data from the session
-                        if 'supplier_id' in request.session:
-                            del request.session['supplier_id']
-                        if 'supplier_name' in request.session:
-                            del request.session['supplier_name']
-                        if 'supplier_contact' in request.session:
-                            del request.session['supplier_contact']
-
-                    return redirect('purchase_master_list')
-
+    # Regular request processing (for non-AJAX)
     sub_total = sum(item.items_total for item in temp_items)
 
     # Generate new invoice number
@@ -103,8 +108,7 @@ def purchase_page(request):
         last_invoice_num = int(last_invoice.invoice_number.split('-')[1])
         invoice_number = f"INV-{last_invoice_num + 1}"
     else:
-        new_invoice_num = 1000
-        invoice_number = f"INV-{new_invoice_num}"
+        invoice_number = "INV-1000"
 
     context = {
         'purchase_form': purchase_form,
@@ -112,11 +116,8 @@ def purchase_page(request):
         'temp_items': temp_items,
         'sub_total': sub_total,
         'invoice_number': invoice_number,
-        'supplier_name': supplier_name,
-        'supplier_contact': supplier_contact,
     }
     return render(request, 'purchase.html', context)
-
 
 
 
@@ -128,7 +129,7 @@ def get_item_price(request, item_id):
 # supplier details
 def get_supplier_details(request, supplier_id):
     supplier = get_object_or_404(Supplier, id=supplier_id)
-    return JsonResponse({'supplier_name': supplier.name, 'supplier_contact': supplier.contact_number})
+    return JsonResponse({'supplier_name': supplier.name, 'supplier_contact': supplier.contact_number, 'supplier_address': supplier.address})
 
 #remove item from temp table
 def remove_item(request, item_id):

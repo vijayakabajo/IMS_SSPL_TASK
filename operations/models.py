@@ -41,7 +41,7 @@ class PurchaseDetail(models.Model):
 
 
 class TempTable(models.Model):
-    item_id = models.ForeignKey(Item, on_delete=models.CASCADE, unique=True)
+    item_id = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.IntegerField(null=False, blank=False)
     items_total = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True) 

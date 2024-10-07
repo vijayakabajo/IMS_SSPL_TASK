@@ -1,9 +1,8 @@
 {% extends "layout.html" %}
 {% block content %}
 
-
-<h1 class='text-3xl mb-4'>Purchase New Items</h1>
-<div class='container'>
+<h1 class="text-3xl mb-4">Purchase New Items</h1>
+<div class="container">
 
     <form id="purchase-form" method="post">
         {% csrf_token %}
@@ -13,96 +12,86 @@
         <label>{{ invoice_number }}</label><br>
         
         <!-- Supplier form fields -->
-        <strong><label class='mt-2'>Supplier:</label></strong>
+        <strong><label class="mt-2">Supplier:</label></strong>
         {{ purchase_form.supplier_id }}
         {{ purchase_form.supplier_id.errors }}
 
-                <!-- Supplier details will be displayed here -->
-                <div id="supplier-details" class="mt-2">
-                    {% if supplier_name and supplier_contact %}
-                        <strong>Supplier Name:</strong> {{ supplier_name }}<br>
-                        <strong>Contact Number:</strong> {{ supplier_contact }}
-                    {% endif %}
-                </div>
-        
+        <!-- Supplier details will be displayed here -->
+        <div id="supplier-details" class="mt-2">
+            {% if supplier_name and supplier_contact %}
+                <strong>Supplier Name:</strong> {{ supplier_name }}<br>
+                <strong>Contact Number:</strong> {{ supplier_contact }}
+            {% endif %}
+        </div>
 
-    <div class='sm:space-x-8 mt-8 '>
+        <div class="sm:space-x-8 mt-8">
             <!-- Item form fields -->
-        <strong><label class=''>Item:</label></strong>
-        {{ temp_form.item_id }}
-        <strong><span id="item-price"></span></strong>  <!-- Display item price -->
-        
-        <strong><label>Quantity:</label></strong>
-        {{ temp_form.quantity }}
-        <strong><span id="item-total"></span></strong>  <!-- Display item total -->
-        
-        <!-- Button to add item -->
-        <button class="btn btn-primary py-1" type="submit" name="add_item">Add Item</button>
+            <strong><label class="">Item:</label></strong>
+            {{ temp_form.item_id }}
+            <strong><span id="item-price"></span></strong> <!-- Display item price -->
+            
+            <strong><label>Quantity:</label></strong>
+            {{ temp_form.quantity }}
+            <strong><span id="item-total"></span></strong> <!-- Display item total -->
 
-    </div>
-        
+            <!-- Button to add item -->
+            <button class="btn btn-primary py-1" type="submit" name="add_item">Add Item</button>
+        </div>
+
         {{ temp_form.item_id.errors }}
         {{ temp_form.quantity.errors }}
 
-
+        <!-- Display messages -->
         {% if messages %}
-    <div class="alert alert-danger mt-2">
-        <ul>
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-{% endif %}
-
-
-        <!-- Table to show added items -->
-        <table class="table mt-3">
-            <thead>
-                <tr>
-                    <th scope="col">Sl. No.</th>
-                    <th scope="col">Item</th>
-                    <th scope="col">Quantity</th>
-                    <th scope="col">Total</th>
-                    <th scope="col">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in temp_items %}
-                <tr id="item-row-{{ item.id }}">
-                    <td scope="row">{{ forloop.counter }}</td>
-                    <td>{{ item.item_id.name }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>{{ item.items_total }}</td>
-                    <td>
-                        <button class="btn btn-danger remove-item-btn" data-item-id="{{ item.id }}">Remove</button>
-                    </td>
-                </tr>
+        <div class="alert alert-danger mt-2">
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
                 {% endfor %}
-            </tbody>
-            
-        </table>
-
-        <div class='flex justify-end mr-2'>
-            <strong>Subtotal:</strong><span id='subtotal' class='ml-1'>{{ sub_total }}</span>
+            </ul>
         </div>
+        {% endif %}
 
-        <!-- Finalize Purchase Button at the Bottom -->
-         <div class='flex justify-end mt-4 mx-2'>
-                <button class="btn btn-primary" type="submit" name="finalize_purchase" id="finalizePurchaseBtn">Finalize Purchase</button>
-                {% comment %} <a href="{% url 'purchase_master_list' %}" class='btn btn-info'><< Purchase List</a> {% endcomment %}
-         </div>
+<!-- Table to show added items -->
+<table class="table mt-3">
+    <thead>
+        <tr>
+            <th scope="col">Sl. No.</th>
+            <th scope="col">Item</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Total</th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody id="temp-items-table">
+        {% for item in temp_items %}
+        <tr id="item-row-{{ item.id }}">
+            <td scope="row">{{ forloop.counter }}</td>
+            <td>{{ item.item_id.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.items_total }}</td>
+            <td>
+                <button class="btn btn-danger remove-item-btn" data-item-id="{{ item.id }}">Remove</button>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No items added yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-    </form>
-
+<div class="flex justify-end mr-2">
+    <strong>Subtotal:</strong><span id="subtotal" class="ml-1">{{ sub_total }}</span>
 </div>
 
-
-
-
-
-
-{% comment %} ---------------------------------------------------scripts--------------------------------------------- {% endcomment %}
+        <!-- Finalize Purchase Button at the Bottom -->
+        <div class="flex justify-end mt-4 mx-2">
+            <button class="btn btn-primary" type="submit" name="finalize_purchase" id="finalizePurchaseBtn">Finalize Purchase</button>
+        </div>
+    </form>
+</div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
@@ -141,48 +130,34 @@
             }
         }
 
+        // Fetch supplier details when a supplier is selected
         $('#id_supplier_id').change(function() {
-            let supplierId = $(this).val();  // Get the selected supplier ID
+            let supplierId = $(this).val();  
             if (supplierId) {
                 $.ajax({
-                    url: '/get-supplier-details/' + supplierId + '/',  // URL to get supplier details
+                    url: '/get-supplier-details/' + supplierId + '/',  
                     success: function(data) {
-                        // Display supplier details in the #supplier-details div
                         $('#supplier-details').html(
                             '<strong>Supplier Name:</strong> ' + data.supplier_name + '<br>' +
-                            '<strong>Contact Number:</strong> ' + data.supplier_contact
+                            '<strong>Contact Number:</strong> ' + data.supplier_contact + '<br>' +
+                            '<strong>Address:</strong> ' + data.supplier_address
                         );
                     },
                     error: function() {
-                        // Handle errors if AJAX request fails
                         $('#supplier-details').html('<strong>Error fetching supplier details</strong>');
                     }
                 });
             } else {
-                // Clear supplier details if no supplier is selected
                 $('#supplier-details').html('');
             }
         });
-    });
-</script>
 
-<script>
-    $(document).ready(function() {
-        $('#finalizePurchaseBtn').click(function() {
-            $('#id_item_id').prop('disabled', true);
-            $('#id_quantity').prop('disabled', true);
-        });
-    });
-</script>
-
-<script>
-    $(document).ready(function() {
-        // Use event delegation for dynamically added buttons
+        // Handle remove item button click
         $(document).on('click', '.remove-item-btn', function(e) {
             e.preventDefault();
             const itemId = $(this).data('item-id');
             const url = '/remove-item/' + itemId + '/';
-    
+
             $.ajax({
                 url: url,
                 method: 'POST',
@@ -193,10 +168,9 @@
                     if (response.success) {
                         // Remove the table row
                         $('#item-row-' + itemId).remove();
-    
+
                         // Update the subtotal
                         $('#subtotal').text(response.sub_total.toFixed(2));
-                        console.log('Subtotal updated to:', response.sub_total); // Debugging line
                     } else {
                         alert('Error: ' + response.error);
                     }
@@ -206,10 +180,69 @@
                 }
             });
         });
-    });
-    
-    
-</script>
 
+        $('#purchase-form').on('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            
+            let formData = $(this).serialize(); 
+            let supplierId = $('#id_supplier_id').val();  
+            formData += '&supplier_id=' + supplierId;  
+            
+            $.ajax({
+                url: '{% url "purchase-page" %}', 
+                method: 'POST',
+                data: formData,
+                success: function(response) {
+                    {% comment %} console.log(response);  {% endcomment %}
+                    $('#id_item_id').val('');  
+                    $('#id_quantity').val(''); 
+        
+                    const item = response.item;
+        
+                    // Ensure 'item' exists and has an 'id' before proceeding
+                    if (item && item.id) {
+                        const existingRow = $('#item-row-' + item.id);
+        
+                        if (existingRow.length > 0) {
+                            // Item already exists, update the quantity and total in the existing row
+                            const currentQuantity = parseInt(existingRow.find('td:eq(2)').text());
+                            const newQuantity = currentQuantity + item.quantity;
+                            existingRow.find('td:eq(2)').text(newQuantity);
+                            existingRow.find('td:eq(3)').text(item.items_total.toFixed(2));
+                        } else {
+                            // Item does not exist, append a new row
+                            const rowHtml = `
+                                <tr id="item-row-${item.id}">
+                                    <td>${$('#temp-items-table tr').length + 1}</td>
+                                    <td>${item.name}</td>
+                                    <td>${item.quantity}</td>
+                                    <td>${item.items_total.toFixed(2)}</td>
+                                    <td>
+                                        <button class="btn btn-danger remove-item-btn" data-item-id="${item.id}">Remove</button>
+                                    </td>
+                                </tr>
+                            `;
+                            $('#temp-items-table').append(rowHtml);
+                        }
+        
+                        // Update the subtotal
+                         $('#subtotal').text(parseFloat(response.sub_total).toFixed(2));
+                    } else {
+                        console.error('Item or item.id is undefined in the response');
+                    }
+                },
+                error: function() {
+                    alert('Error adding item.');
+                }
+            });
+        });
+
+        // Disable item and quantity fields when finalizing the purchase
+        $('#finalizePurchaseBtn').click(function() {
+            $('#id_item_id').prop('disabled', true);
+            $('#id_quantity').prop('disabled', true);
+        });
+    });
+</script>
 
 {% endblock %}
