@@ -26,10 +26,6 @@ def purchase_detail_view(request, pk):
     return render(request, 'purchase_detail_view.html', {'purchase_master': purchase_master, 'purchase_details': purchase_details})
 
 
-
-
-
-
 # New Purchase
 @transaction.atomic
 def purchase_page(request):
@@ -38,7 +34,6 @@ def purchase_page(request):
     purchase_form = PurchaseMasterForm()
 
     if request.method == 'POST':
-        # Handle AJAX request for adding items to temp table
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             temp_form = TempTableForm(request.POST)
             supplier_id = request.POST.get('supplier_id')
@@ -56,6 +51,7 @@ def purchase_page(request):
                 if not created:
                     temp_item.quantity += quantity
                     temp_item.items_total += items_total
+                    
                 temp_item.save()
 
                 temp_items = TempTable.objects.all().order_by('-created_at')
@@ -66,12 +62,11 @@ def purchase_page(request):
                         'id': temp_item.id,
                         'name': temp_item.item_id.name,
                         'quantity': temp_item.quantity,
-                        'items_total': temp_item.items_total
+                        'items_total': (temp_item.items_total),
                     },
-                    'sub_total': sub_total
+                    'sub_total': (sub_total)
                 })
 
-        # Handle finalizing the purchase
         elif 'finalize_purchase' in request.POST:
             if temp_items.exists():
                 supplier = get_object_or_404(Supplier, id=request.POST.get('supplier_id'))
@@ -92,14 +87,13 @@ def purchase_page(request):
                         items_total=temp_item.items_total
                     )
 
-                # Clear temp items after purchase is finalized
                 temp_items.delete()
                 return redirect('purchase_master_list')
 
             else:
                 messages.error(request, "No items to finalize.")
 
-    # Regular request processing (for non-AJAX)
+
     sub_total = sum(item.items_total for item in temp_items)
 
     # Generate new invoice number
@@ -114,7 +108,7 @@ def purchase_page(request):
         'purchase_form': purchase_form,
         'temp_form': temp_form,
         'temp_items': temp_items,
-        'sub_total': sub_total,
+        'sub_total': (sub_total),
         'invoice_number': invoice_number,
     }
     return render(request, 'purchase.html', context)
