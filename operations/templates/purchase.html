@@ -181,10 +181,11 @@
             });
         });
 
+
         $('#purchase-form').on('submit', function(e) {
-            e.preventDefault(); // Prevent default form submission
+            e.preventDefault();
             
-            let formData = $(this).serialize(); 
+            let formData = $(this).serialize();
             let supplierId = $('#id_supplier_id').val();  
             formData += '&supplier_id=' + supplierId;  
             
@@ -193,30 +194,36 @@
                 method: 'POST',
                 data: formData,
                 success: function(response) {
-                    console.log(response); 
-                    $('#id_item_id').val('');  
-                    $('#id_quantity').val(''); 
-        
-                    const item = response.item;
-        
-                    // Ensure 'item' exists and has an 'id' before proceeding
-                    if (item && item.id) {
+                    console.log(response);  
+                    
+                    // Ensure 'item' exists and has valid data
+                    if (response.item && response.item.id) {
+                        const item = response.item;
+                        
+                        // Clear item and quantity fields after successful addition
+                        $('#id_item_id').val('');
+                        $('#id_quantity').val('');
+                        
                         const existingRow = $('#item-row-' + item.id);
-        
+                        
                         if (existingRow.length > 0) {
-                            // Item already exists, update the quantity and total in the existing row
-                            const currentQuantity = parseInt(existingRow.find('td:eq(2)').text());
-                            const newQuantity = currentQuantity + item.quantity;
+                            // If the item already exists, update the quantity and total
+                            const newQuantity = item.quantity;
                             existingRow.find('td:eq(2)').text(newQuantity);
-                            existingRow.find('td:eq(3)').text(item.items_total.toFixed(2));
+                            existingRow.find('td:eq(3)').text(parseFloat(item.items_total).toFixed(2));
                         } else {
-                            // Item does not exist, append a new row
+                            // Remove the empty message if it's present
+                            if ($('#temp-items-table tr').length === 1 && $('#temp-items-table tr:contains("No items added yet")').length) {
+                                $('#temp-items-table').empty();
+                            }
+        
+                            // Append the new item row
                             const rowHtml = `
                                 <tr id="item-row-${item.id}">
                                     <td>${$('#temp-items-table tr').length + 1}</td>
                                     <td>${item.name}</td>
                                     <td>${item.quantity}</td>
-                                    <td>${item.items_total.toFixed(2)}</td>
+                                    <td>${parseFloat(item.items_total).toFixed(2)}</td>
                                     <td>
                                         <button class="btn btn-danger remove-item-btn" data-item-id="${item.id}">Remove</button>
                                     </td>
@@ -224,18 +231,21 @@
                             `;
                             $('#temp-items-table').append(rowHtml);
                         }
-        
+                        
                         // Update the subtotal
-                         $('#subtotal').text(parseFloat(response.sub_total).toFixed(2));
+                        $('#subtotal').text(parseFloat(response.sub_total).toFixed(2));
                     } else {
-                        console.error('Item or item.id is undefined in the response');
+                        console.error('Error: Item or item.id is undefined in the response:', response);
                     }
                 },
-                error: function() {
-                    alert('Error adding item.');
+                error: function(xhr, status, error) {
+                    console.error('Error adding item:', error);
                 }
             });
         });
+        
+        
+        
 
         // Disable item and quantity fields when finalizing the purchase
         $('#finalizePurchaseBtn').click(function() {

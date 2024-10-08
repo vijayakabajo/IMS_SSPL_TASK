@@ -26,6 +26,7 @@ def purchase_detail_view(request, pk):
     return render(request, 'purchase_detail_view.html', {'purchase_master': purchase_master, 'purchase_details': purchase_details})
 
 
+
 # New Purchase
 @transaction.atomic
 def purchase_page(request):
@@ -35,50 +36,59 @@ def purchase_page(request):
 
     if request.method == 'POST':
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            # Handle AJAX request to add item
             temp_form = TempTableForm(request.POST)
             supplier_id = request.POST.get('supplier_id')
 
             if temp_form.is_valid():
                 item_id = temp_form.cleaned_data['item_id']
                 quantity = temp_form.cleaned_data['quantity']
-                item_price = temp_form.cleaned_data['item_id'].price
+                item_price = item_id.price  # Use item_id to get the price
                 items_total = item_price * quantity
 
+                # Either create a new TempTable entry or update the quantity if it exists
                 temp_item, created = TempTable.objects.get_or_create(
                     item_id=item_id,
                     defaults={'quantity': quantity, 'items_total': items_total}
                 )
+
+                # If the item already exists, update the quantity and total
                 if not created:
                     temp_item.quantity += quantity
                     temp_item.items_total += items_total
-                    
-                temp_item.save()
+                    temp_item.save()
 
+                # Recalculate the subtotal after adding/updating the item
                 temp_items = TempTable.objects.all().order_by('-created_at')
                 sub_total = sum(item.items_total for item in temp_items)
+                
 
+                # Return JSON response with item details and updated subtotal
                 return JsonResponse({
                     'item': {
                         'id': temp_item.id,
                         'name': temp_item.item_id.name,
                         'quantity': temp_item.quantity,
-                        'items_total': (temp_item.items_total),
+                        'items_total': float(temp_item.items_total),
                     },
-                    'sub_total': (sub_total)
+                    'sub_total': float(sub_total)
                 })
 
         elif 'finalize_purchase' in request.POST:
+            # Finalize the purchase
             if temp_items.exists():
                 supplier = get_object_or_404(Supplier, id=request.POST.get('supplier_id'))
                 invoice_number = request.POST.get('invoice_number')
                 sub_total = sum(item.items_total for item in temp_items)
 
+                # Create a new PurchaseMaster record
                 purchase_master = PurchaseMaster.objects.create(
                     supplier_id=supplier,
                     invoice_number=invoice_number,
                     sub_total=sub_total
                 )
 
+                # Create PurchaseDetail records for each item in temp_items
                 for temp_item in temp_items:
                     PurchaseDetail.objects.create(
                         purchase_master=purchase_master,
@@ -87,13 +97,15 @@ def purchase_page(request):
                         items_total=temp_item.items_total
                     )
 
+                # Clear the temp table after finalizing the purchase
                 temp_items.delete()
-                return redirect('purchase_master_list')
 
+                # Redirect to a list of purchases or any other page
+                return redirect('purchase_master_list')
             else:
                 messages.error(request, "No items to finalize.")
 
-
+    # Calculate subtotal for display
     sub_total = sum(item.items_total for item in temp_items)
 
     # Generate new invoice number
@@ -104,14 +116,16 @@ def purchase_page(request):
     else:
         invoice_number = "INV-1000"
 
+    # Render the purchase page with necessary context
     context = {
         'purchase_form': purchase_form,
         'temp_form': temp_form,
         'temp_items': temp_items,
-        'sub_total': (sub_total),
+        'sub_total': sub_total,
         'invoice_number': invoice_number,
     }
     return render(request, 'purchase.html', context)
+
 
 
 
@@ -137,7 +151,7 @@ def remove_item(request, item_id):
             sub_total = sum(item.items_total for item in temp_items)
 
             # Return a JSON response with success and the updated subtotal
-            return JsonResponse({'success': True, 'sub_total': sub_total})
+            return JsonResponse({'success': True, 'sub_total': float(sub_total)})
 
         except TempTable.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Item not found.'})
