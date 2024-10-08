@@ -93,6 +93,9 @@
     </form>
 </div>
 
+
+
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
     $(document).ready(function() {
@@ -187,14 +190,15 @@
             
             let formData = $(this).serialize();
             let supplierId = $('#id_supplier_id').val();  
-            formData += '&supplier_id=' + supplierId;  
+            formData += '&supplier_id=' + supplierId;    
+            
             
             $.ajax({
                 url: '{% url "purchase-page" %}', 
                 method: 'POST',
                 data: formData,
                 success: function(response) {
-                    console.log(response);  
+                    console.log('Response:', response);  
                     
                     // Ensure 'item' exists and has valid data
                     if (response.item && response.item.id) {

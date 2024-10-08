@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
-from .models import PurchaseMaster, PurchaseDetail, TempTable, SalesDetail, SalesTempTable, SalesMaster, SalesMaster, SalesDetail, SalesTempTable, Supplier
+from .models import PurchaseMaster, PurchaseDetail, TempTable, SalesMaster, SalesDetail, SalesTempTable 
 from master.models import Supplier, Item
 from .forms import TempTableForm, PurchaseMasterForm, SalesMasterForm , SalesTempForm, SalesMasterForm, SalesTempForm
 from django.http import JsonResponse

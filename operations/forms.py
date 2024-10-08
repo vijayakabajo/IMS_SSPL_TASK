@@ -31,6 +31,8 @@ class TempTableForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['item_id'].queryset = Item.objects.filter(status=1)
+        self.fields['item_id'].label = "Item"
+
 
 
     
